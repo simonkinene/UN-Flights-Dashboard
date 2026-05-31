@@ -463,17 +463,44 @@ function extractOp(r){if(!r)return'';const m=String(r).match(/by\s+(.+?)(\.|$)/i
 function countBy(arr,key){return arr.reduce((acc,f)=>{acc[f[key]]=(acc[f[key]]||0)+1;return acc;},{});}
 
 function processSheet(rows){
-  if(!rows||rows.length<2)return[];
-  const headers=rows[0].map(h=>String(h).trim().toUpperCase());
-  const get=(row,...keys)=>{for(const k of keys){const i=headers.indexOf(k);if(i>=0&&row[i]!==undefined)return String(row[i]).trim();}return'';};
-  return rows.slice(1).map(row=>({
-    date:get(row,'DATE'),mission:get(row,'MISSION').toUpperCase(),
-    posn:get(row,'POSN'),dest:get(row,'DESTINATION'),
-    ac:normAc(get(row,'AIRCRAFT TYPE')),reg:get(row,'REG N.O','REG NO'),
-    flt:get(row,'FLIGHT N.O','FLIGHT NO'),bay:get(row,'BAY'),
-    arr:cleanTime(get(row,'ARRIVAL TIME')),
-    dep:cleanTime(get(row,"DEP'T TIME",'DEPT TIME','DEPARTURE TIME')),
-    op:extractOp(get(row,'REMARKS')),
+  if(!rows||!rows.length)return[];
+
+  // FORMAT A: array of arrays [[headers],[row],[row]...]
+  if(Array.isArray(rows[0])){
+    const headers=rows[0].map(h=>String(h).trim().toUpperCase());
+    const get=(row,...keys)=>{for(const k of keys){const i=headers.indexOf(k);if(i>=0&&row[i]!==undefined)return String(row[i]).trim();}return'';};
+    return rows.slice(1).map(row=>({
+      date:get(row,'DATE'),mission:get(row,'MISSION').toUpperCase(),
+      posn:get(row,'POSN'),dest:get(row,'DESTINATION'),
+      ac:normAc(get(row,'AIRCRAFT TYPE')),reg:get(row,'REG N.O','REG NO'),
+      flt:get(row,'FLIGHT N.O','FLIGHT NO'),bay:get(row,'BAY'),
+      arr:cleanTime(get(row,'ARRIVAL TIME')),
+      dep:cleanTime(get(row,"DEP'T TIME",'DEPT TIME','DEPARTURE TIME')),
+      op:extractOp(get(row,'REMARKS')),
+    })).filter(r=>r.mission&&r.mission!=='MISSION'&&r.mission.length>1);
+  }
+
+  // FORMAT B: array of objects [{DATE:'...',MISSION:'...'}, ...]
+  const getO=(obj,...keys)=>{
+    for(const k of keys){
+      // try exact, uppercase, lowercase variants
+      const found=Object.keys(obj).find(ok=>ok.trim().toUpperCase()===k.toUpperCase());
+      if(found&&obj[found]!==undefined&&obj[found]!==null)return String(obj[found]).trim();
+    }
+    return'';
+  };
+  return rows.map(obj=>({
+    date:getO(obj,'DATE'),
+    mission:getO(obj,'MISSION').toUpperCase(),
+    posn:getO(obj,'POSN'),
+    dest:getO(obj,'DESTINATION'),
+    ac:normAc(getO(obj,'AIRCRAFT TYPE')),
+    reg:getO(obj,'REG N.O','REG NO'),
+    flt:getO(obj,'FLIGHT N.O','FLIGHT NO'),
+    bay:getO(obj,'BAY'),
+    arr:cleanTime(getO(obj,'ARRIVAL TIME')),
+    dep:cleanTime(getO(obj,"DEP'T TIME",'DEPT TIME','DEPARTURE TIME')),
+    op:extractOp(getO(obj,'REMARKS')),
   })).filter(r=>r.mission&&r.mission!=='MISSION'&&r.mission.length>1);
 }
 
