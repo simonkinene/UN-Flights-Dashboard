@@ -1,0 +1,1001 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Wonder's UN Flights Ops — Entebbe 2026</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#060b14;
+  --surface:#0d1520;
+  --surface2:#111e2e;
+  --surface3:#162035;
+  --border:rgba(0,200,255,0.08);
+  --border2:rgba(0,200,255,0.18);
+  --border3:rgba(0,200,255,0.35);
+  --text:#d0e8ff;
+  --text2:#6a8faf;
+  --text3:#2e4a62;
+  --accent:#00c8ff;
+  --accent2:#00ff9d;
+  --accent3:#ff6b35;
+  --unmiss:#2979ff;
+  --monusco:#a855f7;
+  --unisfa:#00c896;
+  --minusca:#f59e0b;
+  --danger:#ff4444;
+  --font-display:'Orbitron',sans-serif;
+  --font-body:'Inter',sans-serif;
+  --font-mono:'JetBrains Mono',monospace;
+  --glow:0 0 20px rgba(0,200,255,0.15);
+  --glow2:0 0 40px rgba(0,200,255,0.08);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{font-family:var(--font-body);background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;}
+
+/* GRID + SCAN LINE BG */
+body::before{content:'';position:fixed;inset:0;
+  background-image:
+    linear-gradient(rgba(0,200,255,0.025) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(0,200,255,0.025) 1px,transparent 1px);
+  background-size:48px 48px;pointer-events:none;z-index:0;}
+body::after{content:'';position:fixed;inset:0;
+  background:linear-gradient(180deg,transparent 0%,rgba(0,200,255,0.015) 50%,transparent 100%);
+  background-size:100% 4px;animation:scanline 8s linear infinite;pointer-events:none;z-index:0;opacity:.4;}
+@keyframes scanline{0%{background-position:0 0}100%{background-position:0 100vh}}
+
+.wrap{max-width:1440px;margin:0 auto;padding:0 28px;position:relative;z-index:1;}
+
+/* ── LOADING ── */
+#loading-screen{position:fixed;inset:0;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:200;gap:20px;}
+.loader-ring{width:64px;height:64px;border-radius:50%;border:2px solid var(--surface2);border-top-color:var(--accent);box-shadow:0 0 20px rgba(0,200,255,0.3);animation:spin 1s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loader-title{font-family:var(--font-display);font-size:14px;color:var(--accent);letter-spacing:.2em;text-transform:uppercase;}
+.loader-text{font-family:var(--font-mono);font-size:11px;color:var(--text2);}
+#error-box{display:none;background:rgba(255,68,68,0.08);border:1px solid rgba(255,68,68,0.3);border-radius:10px;padding:20px 28px;max-width:460px;text-align:center;}
+#error-box h3{color:var(--danger);font-family:var(--font-mono);font-size:13px;margin-bottom:10px;}
+#error-box p{font-family:var(--font-mono);font-size:11px;color:var(--text2);line-height:1.8;}
+
+/* ── HEADER ── */
+header{padding:24px 0 20px;border-bottom:1px solid var(--border2);margin-bottom:28px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px;position:relative;}
+header::after{content:'';position:absolute;bottom:-1px;left:0;width:200px;height:1px;background:linear-gradient(90deg,var(--accent),transparent);box-shadow:0 0 10px var(--accent);}
+.logo-block{display:flex;align-items:center;gap:16px;}
+.logo-icon{width:52px;height:52px;border-radius:50%;border:1px solid var(--border3);background:radial-gradient(circle,rgba(0,200,255,0.15),transparent);display:flex;align-items:center;justify-content:center;position:relative;flex-shrink:0;}
+.logo-icon::before{content:'';position:absolute;inset:-4px;border-radius:50%;border:1px solid rgba(0,200,255,0.2);animation:rotate-slow 8s linear infinite;}
+@keyframes rotate-slow{to{transform:rotate(360deg)}}
+.logo-icon svg{width:26px;height:26px;fill:none;stroke:var(--accent);stroke-width:1.5;}
+.header-title{font-family:var(--font-display);font-size:18px;font-weight:700;letter-spacing:.05em;color:var(--text);line-height:1.2;}
+.header-title span{color:var(--accent);text-shadow:0 0 20px rgba(0,200,255,0.5);}
+.header-sub{font-family:var(--font-mono);font-size:10px;color:var(--text2);margin-top:4px;letter-spacing:.12em;text-transform:uppercase;}
+.header-right{display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
+
+/* LIVE BEACON */
+.live-beacon{display:flex;align-items:center;gap:10px;background:rgba(0,255,157,0.05);border:1px solid rgba(0,255,157,0.2);border-radius:8px;padding:8px 14px;}
+.beacon-rings{position:relative;width:20px;height:20px;flex-shrink:0;}
+.beacon-core{position:absolute;top:50%;left:50%;width:8px;height:8px;border-radius:50%;background:var(--accent2);transform:translate(-50%,-50%);box-shadow:0 0 8px var(--accent2);}
+.beacon-ring{position:absolute;top:50%;left:50%;border-radius:50%;border:1px solid var(--accent2);transform:translate(-50%,-50%);animation:beacon-expand 2s ease-out infinite;}
+.beacon-ring:nth-child(2){width:14px;height:14px;animation-delay:.4s;}
+.beacon-ring:nth-child(3){width:20px;height:20px;animation-delay:.8s;}
+@keyframes beacon-expand{0%{opacity:.8;transform:translate(-50%,-50%) scale(.3)}100%{opacity:0;transform:translate(-50%,-50%) scale(1)}}
+.live-text{font-family:var(--font-mono);font-size:11px;color:var(--accent2);letter-spacing:.1em;}
+.live-time{font-family:var(--font-mono);font-size:12px;color:var(--text2);letter-spacing:.05em;}
+.refresh-btn{background:transparent;border:1px solid var(--border2);border-radius:6px;padding:7px 14px;font-family:var(--font-mono);font-size:11px;color:var(--text2);cursor:pointer;transition:all .2s;letter-spacing:.05em;}
+.refresh-btn:hover{border-color:var(--accent);color:var(--accent);box-shadow:0 0 10px rgba(0,200,255,0.1);}
+
+/* ── RADAR ── */
+.radar-strip{display:flex;align-items:center;gap:20px;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px 20px;margin-bottom:20px;overflow:hidden;position:relative;}
+.radar-strip::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:linear-gradient(180deg,transparent,var(--accent),transparent);animation:pulse-bar 2s ease-in-out infinite;}
+@keyframes pulse-bar{0%,100%{opacity:.3}50%{opacity:1}}
+.radar-canvas-wrap{position:relative;flex-shrink:0;}
+canvas#radarCanvas{display:block;}
+.radar-info{flex:1;display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}
+.radar-stat{text-align:center;}
+.radar-stat-val{font-family:var(--font-display);font-size:20px;font-weight:700;color:var(--accent);text-shadow:0 0 15px rgba(0,200,255,0.4);}
+.radar-stat-label{font-family:var(--font-mono);font-size:10px;color:var(--text2);margin-top:4px;text-transform:uppercase;letter-spacing:.1em;}
+.radar-divider{width:1px;background:var(--border2);align-self:stretch;}
+
+/* ── OVERVIEW ── */
+.overview{display:grid;grid-template-columns:repeat(6,1fr);gap:8px;margin-bottom:20px;}
+.ov-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 14px;cursor:pointer;transition:all .25s;position:relative;overflow:hidden;}
+.ov-card::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(0,200,255,0.05),transparent);opacity:0;transition:opacity .25s;}
+.ov-card:hover::before,.ov-card.sel::before{opacity:1;}
+.ov-card:hover{border-color:var(--border2);transform:translateY(-2px);box-shadow:var(--glow);}
+.ov-card.sel{border-color:var(--accent);box-shadow:0 0 16px rgba(0,200,255,0.12);}
+.ov-month{font-family:var(--font-mono);font-size:10px;color:var(--text2);margin-bottom:6px;text-transform:uppercase;letter-spacing:.1em;}
+.ov-count{font-family:var(--font-display);font-size:22px;font-weight:700;color:var(--text);}
+.ov-bar{height:2px;background:var(--surface3);border-radius:1px;margin-top:8px;overflow:hidden;}
+.ov-bar-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));border-radius:1px;transition:width .6s cubic-bezier(.4,0,.2,1);}
+.ov-sub{font-family:var(--font-mono);font-size:9px;color:var(--text3);margin-top:5px;}
+
+/* ── TABS ── */
+.month-bar{display:flex;gap:6px;margin-bottom:20px;flex-wrap:wrap;}
+.mtab{background:transparent;border:1px solid var(--border);border-radius:6px;padding:6px 16px;font-family:var(--font-mono);font-size:11px;font-weight:500;color:var(--text2);cursor:pointer;transition:all .2s;letter-spacing:.06em;text-transform:uppercase;}
+.mtab:hover{border-color:var(--border2);color:var(--text);}
+.mtab.active{background:rgba(0,200,255,0.08);border-color:var(--accent);color:var(--accent);box-shadow:0 0 12px rgba(0,200,255,0.1);}
+
+/* ── METRICS ── */
+.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px;}
+.metric{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:18px 20px;position:relative;overflow:hidden;transition:box-shadow .2s;}
+.metric:hover{box-shadow:var(--glow);}
+.metric::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--m-color,var(--accent)),transparent);}
+.metric::after{content:'';position:absolute;bottom:0;right:0;width:60px;height:60px;border-radius:50%;background:radial-gradient(circle,var(--m-color,var(--accent)) 0%,transparent 70%);opacity:.06;}
+.metric-icon{font-size:18px;margin-bottom:10px;display:block;}
+.metric-label{font-family:var(--font-mono);font-size:10px;color:var(--text2);margin-bottom:8px;text-transform:uppercase;letter-spacing:.1em;}
+.metric-value{font-family:var(--font-display);font-size:28px;font-weight:700;line-height:1;color:var(--text);}
+.metric-sub{font-family:var(--font-mono);font-size:10px;color:var(--text3);margin-top:8px;}
+
+/* ── PANELS ── */
+.panels{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px 22px;margin-bottom:12px;position:relative;transition:box-shadow .2s;}
+.card:hover{box-shadow:var(--glow2);}
+.card-title{font-family:var(--font-mono);font-size:10px;color:var(--text2);text-transform:uppercase;letter-spacing:.12em;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;}
+.card-title-accent{color:var(--accent);font-size:10px;}
+.legend-row{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:12px;}
+.leg{display:flex;align-items:center;gap:5px;font-family:var(--font-mono);font-size:10px;color:var(--text2);}
+.leg-dot{width:8px;height:8px;border-radius:2px;flex-shrink:0;}
+
+/* ── TABLE ── */
+.search-wrap{position:relative;margin-bottom:10px;}
+.search-wrap input{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:10px 14px 10px 36px;font-family:var(--font-mono);font-size:12px;color:var(--text);transition:border-color .2s;letter-spacing:.03em;}
+.search-wrap input::placeholder{color:var(--text3);}
+.search-wrap input:focus{outline:none;border-color:var(--accent);box-shadow:0 0 12px rgba(0,200,255,0.08);}
+.search-wrap::before{content:'⌕';position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--text3);font-size:17px;}
+.filters{display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap;}
+.fbtn{background:transparent;border:1px solid var(--border);border-radius:5px;padding:4px 12px;font-family:var(--font-mono);font-size:10px;color:var(--text2);cursor:pointer;transition:all .15s;text-transform:uppercase;letter-spacing:.06em;}
+.fbtn:hover{border-color:var(--border2);color:var(--text);}
+.fbtn.on{background:rgba(0,200,255,0.1);border-color:var(--accent);color:var(--accent);}
+.tbl-wrap{overflow-x:auto;max-height:440px;overflow-y:auto;}
+.tbl-wrap::-webkit-scrollbar{width:4px;height:4px;}
+.tbl-wrap::-webkit-scrollbar-track{background:var(--surface2);}
+.tbl-wrap::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px;}
+table{width:100%;border-collapse:collapse;font-family:var(--font-mono);font-size:11px;}
+thead th{font-size:9px;font-weight:500;color:var(--text3);text-align:left;padding:0 10px 10px 0;border-bottom:1px solid var(--border2);white-space:nowrap;text-transform:uppercase;letter-spacing:.1em;position:sticky;top:0;background:var(--surface);z-index:1;}
+tbody tr{border-bottom:1px solid var(--border);transition:background .1s;}
+tbody tr:last-child{border-bottom:none;}
+tbody tr:hover{background:var(--surface2);}
+tbody td{padding:9px 10px 9px 0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.badge{display:inline-block;font-size:9px;font-weight:700;font-family:var(--font-mono);padding:2px 8px;border-radius:3px;letter-spacing:.06em;}
+.b-UNMISS{background:rgba(41,121,255,0.15);color:#60a5fa;border:1px solid rgba(41,121,255,0.3);}
+.b-MONUSCO{background:rgba(168,85,247,0.15);color:#c084fc;border:1px solid rgba(168,85,247,0.3);}
+.b-UNISFA{background:rgba(0,200,150,0.12);color:#34d399;border:1px solid rgba(0,200,150,0.3);}
+.b-MINUSCA{background:rgba(245,158,11,0.12);color:#fbbf24;border:1px solid rgba(245,158,11,0.3);}
+.b-OTHER{background:rgba(255,255,255,0.04);color:var(--text2);border:1px solid var(--border);}
+
+/* ── TICKER ── */
+.ticker-wrap{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:10px 16px;margin-bottom:20px;display:flex;align-items:center;gap:14px;overflow:hidden;}
+.ticker-label{font-family:var(--font-mono);font-size:9px;color:var(--accent);text-transform:uppercase;letter-spacing:.12em;white-space:nowrap;border-right:1px solid var(--border2);padding-right:14px;flex-shrink:0;}
+.ticker-scroll{overflow:hidden;flex:1;position:relative;}
+.ticker-inner{display:flex;gap:32px;animation:ticker 40s linear infinite;white-space:nowrap;}
+.ticker-inner:hover{animation-play-state:paused;}
+@keyframes ticker{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+.ticker-item{font-family:var(--font-mono);font-size:10px;color:var(--text2);flex-shrink:0;}
+.ticker-item span{color:var(--accent2);}
+.ticker-sep{color:var(--text3);}
+
+footer{margin-top:32px;padding:20px 0;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;font-family:var(--font-mono);font-size:10px;color:var(--text3);letter-spacing:.06em;}
+footer a{color:var(--accent);text-decoration:none;}
+
+@media(max-width:1000px){.metrics{grid-template-columns:repeat(2,1fr)}.panels{grid-template-columns:1fr}.overview{grid-template-columns:repeat(3,1fr)}.radar-info{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:640px){.overview{grid-template-columns:repeat(2,1fr)}.metrics{grid-template-columns:1fr 1fr}.header-title{font-size:14px}.radar-strip{flex-direction:column}}
+
+/* ── EXPLAINER CARDS ── */
+.explainer-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:4px;}
+.ex-card{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:14px 16px;border-left:3px solid var(--ex-color,var(--accent));transition:box-shadow .2s;}
+.ex-card:hover{box-shadow:0 0 16px rgba(0,200,255,0.08);}
+.ex-header{display:flex;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap;}
+.ex-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0;}
+.ex-name{font-family:var(--font-display);font-size:12px;font-weight:700;color:var(--text);letter-spacing:.06em;}
+.ex-badge{font-family:var(--font-mono);font-size:9px;color:var(--text3);background:var(--surface3);border:1px solid var(--border);border-radius:3px;padding:1px 6px;margin-left:auto;}
+.ex-full{font-family:var(--font-body);font-size:11px;color:var(--accent);margin-bottom:6px;font-weight:500;line-height:1.4;}
+.ex-desc{font-family:var(--font-body);font-size:11px;color:var(--text2);line-height:1.6;margin-bottom:10px;}
+.ex-stats{display:flex;gap:8px;flex-wrap:wrap;}
+.ex-stat{font-family:var(--font-mono);font-size:10px;color:var(--text3);background:var(--surface);border:1px solid var(--border);border-radius:4px;padding:3px 8px;}
+.ex-stat.hot{color:var(--accent2);border-color:rgba(0,255,157,0.2);}
+/* aircraft grid is 3 cols */
+#ac-explainer-grid{grid-template-columns:repeat(3,1fr);}
+.ac-icon{font-size:22px;margin-bottom:6px;display:block;}
+.ac-role{font-family:var(--font-mono);font-size:9px;color:var(--accent3);text-transform:uppercase;letter-spacing:.1em;margin-bottom:4px;}
+@media(max-width:1100px){.explainer-grid{grid-template-columns:repeat(2,1fr)}#ac-explainer-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:640px){.explainer-grid{grid-template-columns:1fr}#ac-explainer-grid{grid-template-columns:1fr}}
+
+/* ── BENTO AIRCRAFT CARDS ── */
+.bento-ac-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:6px;}
+.bento-ac{background:var(--surface2);border:1px solid var(--border);border-radius:14px;overflow:hidden;display:flex;flex-direction:column;transition:transform .25s,box-shadow .25s;position:relative;}
+.bento-ac:hover{transform:translateY(-3px);box-shadow:0 8px 32px rgba(0,200,255,0.12);}
+.bento-ac-hero{height:160px;position:relative;display:flex;align-items:center;justify-content:center;overflow:hidden;}
+.bento-ac-hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at center,var(--ac-color,rgba(0,200,255,0.18)) 0%,transparent 70%);opacity:.5;}
+.bento-ac-hero::after{content:'';position:absolute;bottom:0;left:0;right:0;height:40px;background:linear-gradient(transparent,var(--surface2));}
+.bento-ac-svg{position:relative;z-index:1;width:100%;height:100%;display:flex;align-items:center;justify-content:center;}
+.bento-ac-glow{position:absolute;bottom:20px;left:50%;transform:translateX(-50%);width:70%;height:12px;background:radial-gradient(ellipse,var(--ac-color,rgba(0,200,255,.4)) 0%,transparent 70%);filter:blur(6px);z-index:0;}
+.bento-ac-body{padding:14px 16px 16px;flex:1;display:flex;flex-direction:column;gap:10px;}
+.bento-ac-name{font-family:var(--font-display);font-size:13px;font-weight:700;color:var(--text);letter-spacing:.06em;display:flex;align-items:center;gap:8px;}
+.bento-ac-role{font-family:var(--font-mono);font-size:9px;color:var(--ac-color,var(--accent));text-transform:uppercase;letter-spacing:.12em;margin-top:-4px;}
+.bento-ac-desc{font-family:var(--font-body);font-size:11px;color:var(--text2);line-height:1.65;}
+.bento-specs{display:grid;grid-template-columns:1fr 1fr;gap:6px;}
+.bento-spec{background:var(--surface3);border:1px solid var(--border);border-radius:8px;padding:8px 10px;}
+.bento-spec-val{font-family:var(--font-display);font-size:14px;font-weight:700;color:var(--text);line-height:1;}
+.bento-spec-label{font-family:var(--font-mono);font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;margin-top:3px;}
+.bento-time{background:linear-gradient(135deg,rgba(0,200,255,0.08),rgba(0,255,157,0.04));border:1px solid rgba(0,200,255,0.15);border-radius:8px;padding:9px 12px;display:flex;align-items:center;gap:10px;}
+.bento-time-icon{font-size:16px;flex-shrink:0;}
+.bento-time-text{font-family:var(--font-mono);font-size:10px;color:var(--text2);line-height:1.5;}
+.bento-time-val{font-family:var(--font-display);font-size:12px;font-weight:700;color:var(--accent2);}
+.bento-missions{display:flex;gap:5px;flex-wrap:wrap;}
+.bento-m-tag{font-family:var(--font-mono);font-size:9px;padding:2px 7px;border-radius:3px;font-weight:600;}
+.bento-sorties{position:absolute;top:10px;right:10px;background:rgba(0,0,0,0.5);backdrop-filter:blur(6px);border:1px solid var(--border2);border-radius:6px;padding:3px 8px;font-family:var(--font-mono);font-size:10px;color:var(--accent2);z-index:2;}
+@media(max-width:1100px){.bento-ac-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:640px){.bento-ac-grid{grid-template-columns:1fr}}
+
+/* ── FLEET VIEWER ── */
+.fleet-ribbon{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;padding-bottom:14px;border-bottom:1px solid var(--border);}
+.fleet-pill{background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:6px 14px;font-family:var(--font-mono);font-size:10px;color:var(--text2);cursor:pointer;transition:all .2s;white-space:nowrap;letter-spacing:.06em;}
+.fleet-pill:hover{border-color:var(--border2);color:var(--text);}
+.fleet-pill.active{background:rgba(0,200,255,0.12);border-color:var(--accent);color:var(--accent);box-shadow:0 0 10px rgba(0,200,255,0.1);}
+.fleet-dropdown-wrap{display:flex;align-items:center;gap:12px;margin-bottom:20px;}
+.fleet-dropdown-label{font-family:var(--font-mono);font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.12em;white-space:nowrap;}
+.fleet-select{flex:1;background:var(--surface2);border:1px solid var(--border2);border-radius:8px;padding:10px 14px;font-family:var(--font-mono);font-size:12px;color:var(--text);cursor:pointer;transition:border-color .2s;max-width:400px;}
+.fleet-select:focus{outline:none;border-color:var(--accent);}
+.fleet-select option{background:var(--surface2);color:var(--text);}
+.fleet-viewer{display:grid;grid-template-columns:1.2fr 1fr;gap:24px;margin-top:4px;animation:fadeIn .3s ease;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+.fleet-photo-wrap{position:relative;border-radius:12px;overflow:hidden;background:var(--surface3);border:1px solid var(--border);aspect-ratio:16/10;}
+.fleet-photo-wrap img{width:100%;height:100%;object-fit:cover;display:block;transition:opacity .3s;}
+.fleet-photo-credit{position:absolute;bottom:0;left:0;right:0;padding:8px 12px;background:linear-gradient(transparent,rgba(0,0,0,0.7));font-family:var(--font-mono);font-size:9px;color:rgba(255,255,255,0.5);}
+.fleet-detail{display:flex;flex-direction:column;gap:12px;justify-content:center;}
+.fleet-detail-name{font-family:var(--font-display);font-size:20px;font-weight:700;color:var(--text);letter-spacing:.06em;}
+.fleet-detail-role{font-family:var(--font-mono);font-size:10px;color:var(--accent);text-transform:uppercase;letter-spacing:.12em;margin-top:-6px;}
+.fleet-detail-desc{font-family:var(--font-body);font-size:12px;color:var(--text2);line-height:1.7;}
+.fleet-detail-specs{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.fleet-spec-item{background:var(--surface3);border:1px solid var(--border);border-radius:8px;padding:10px 12px;}
+.fleet-spec-val{font-family:var(--font-display);font-size:16px;font-weight:700;color:var(--text);}
+.fleet-spec-label{font-family:var(--font-mono);font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;margin-top:3px;}
+.fleet-missions{display:flex;gap:6px;flex-wrap:wrap;}
+.fleet-m-tag{font-family:var(--font-mono);font-size:9px;font-weight:700;padding:3px 9px;border-radius:4px;}
+.fleet-sorties-row{background:rgba(0,200,255,0.06);border:1px solid rgba(0,200,255,0.15);border-radius:8px;padding:10px 14px;font-family:var(--font-mono);font-size:11px;color:var(--text2);}
+.fleet-sorties-row span{color:var(--accent2);font-weight:700;}
+@media(max-width:800px){.fleet-viewer{grid-template-columns:1fr}}
+
+</style>
+</head>
+<body>
+
+<!-- LOADING -->
+<div id="loading-screen">
+  <div class="loader-ring"></div>
+  <div class="loader-title">Wonder's UN Flights Ops</div>
+  <div class="loader-text" id="load-msg">Initialising systems…</div>
+  <div id="error-box"><h3>⚠ CONNECTION FAILED</h3><p id="error-msg"></p></div>
+</div>
+
+<div class="wrap" id="app" style="display:none">
+
+<!-- HEADER -->
+<header>
+  <div class="logo-block">
+    <div class="logo-icon">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4"/><circle cx="12" cy="12" r="9" stroke-dasharray="2 3"/></svg>
+    </div>
+    <div>
+      <div class="header-title"><span>Wonder's</span> UN Flights Ops</div>
+      <div class="header-sub">Entebbe · Bay A4 · 2026 · Live Operations</div>
+    </div>
+  </div>
+  <div class="header-right">
+    <div class="live-beacon">
+      <div class="beacon-rings">
+        <div class="beacon-ring"></div>
+        <div class="beacon-ring"></div>
+        <div class="beacon-core"></div>
+      </div>
+      <div class="live-text">LIVE</div>
+    </div>
+    <div class="live-time" id="clock">--:--:-- UTC</div>
+    <button class="refresh-btn" onclick="refreshData()">↻ REFRESH</button>
+    <div id="last-updated" style="font-family:var(--font-mono);font-size:10px;color:var(--text3)">—</div>
+  </div>
+</header>
+
+<!-- TICKER -->
+<div class="ticker-wrap">
+  <div class="ticker-label">▶ LIVE FEED</div>
+  <div class="ticker-scroll">
+    <div class="ticker-inner" id="ticker-inner">
+      <span class="ticker-item">Loading flight data…</span>
+    </div>
+  </div>
+</div>
+
+<!-- RADAR + STATS -->
+<div class="radar-strip">
+  <div class="radar-canvas-wrap">
+    <canvas id="radarCanvas" width="120" height="120"></canvas>
+  </div>
+  <div class="radar-divider"></div>
+  <div class="radar-info">
+    <div class="radar-stat">
+      <div class="radar-stat-val" id="r-total">—</div>
+      <div class="radar-stat-label">Total Sorties</div>
+    </div>
+    <div class="radar-stat">
+      <div class="radar-stat-val" id="r-missions">—</div>
+      <div class="radar-stat-label">Active Missions</div>
+    </div>
+    <div class="radar-stat">
+      <div class="radar-stat-val" id="r-aircraft">—</div>
+      <div class="radar-stat-label">Aircraft Types</div>
+    </div>
+    <div class="radar-stat">
+      <div class="radar-stat-val" id="r-month">—</div>
+      <div class="radar-stat-label">This Month</div>
+    </div>
+    <div class="radar-stat">
+      <div class="radar-stat-val" id="r-busiest">—</div>
+      <div class="radar-stat-label">Peak Day</div>
+    </div>
+
+  </div>
+</div>
+
+<!-- OVERVIEW CARDS -->
+<div class="overview" id="overview"></div>
+
+<!-- MONTH TABS -->
+<div class="month-bar" id="month-tabs"></div>
+
+<!-- METRICS -->
+<div class="metrics">
+  <div class="metric" style="--m-color:var(--accent)">
+    <span class="metric-icon">✈</span>
+    <div class="metric-label">Total Flights</div>
+    <div class="metric-value" id="m-total">—</div>
+    <div class="metric-sub" id="m-sub">—</div>
+  </div>
+  <div class="metric" style="--m-color:var(--unmiss)">
+    <span class="metric-icon">🎯</span>
+    <div class="metric-label">Top Mission</div>
+    <div class="metric-value" id="m-mission" style="font-size:17px;padding-top:4px">—</div>
+    <div class="metric-sub" id="m-mission-sub">—</div>
+  </div>
+  <div class="metric" style="--m-color:var(--accent2)">
+    <span class="metric-icon">🛩</span>
+    <div class="metric-label">Top Aircraft</div>
+    <div class="metric-value" id="m-ac" style="font-size:17px;padding-top:4px">—</div>
+    <div class="metric-sub" id="m-ac-sub">—</div>
+  </div>
+
+</div>
+
+<!-- CHARTS -->
+<div class="panels">
+  <div class="card" style="margin-bottom:0">
+    <div class="card-title">Flights by Mission <span class="card-title-accent" id="mission-total"></span></div>
+    <div class="legend-row" id="mission-legend"></div>
+    <div style="position:relative;height:200px"><canvas id="missionChart"></canvas></div>
+  </div>
+  <div class="card" style="margin-bottom:0">
+    <div class="card-title">Aircraft Breakdown</div>
+    <div class="legend-row" id="ac-legend"></div>
+    <div style="position:relative;height:200px"><canvas id="acChart"></canvas></div>
+  </div>
+</div>
+
+<!-- EXPLAINER: MISSIONS -->
+<div class="card" id="mission-explainer">
+  <div class="card-title">Mission Profiles <span class="card-title-accent">· What each mission does</span></div>
+  <div class="explainer-grid" id="mission-explainer-grid">
+    <div class="ex-card" style="--ex-color:#2979ff">
+      <div class="ex-header"><span class="ex-dot" style="background:#2979ff"></span><span class="ex-name">UNMISS</span><span class="ex-badge">UN Mission · South Sudan</span></div>
+      <div class="ex-full">United Nations Mission in South Sudan</div>
+      <div class="ex-desc">Supports peace consolidation, rule of law, and civilian protection in South Sudan. Primary route: Entebbe → Juba (JUB).</div>
+      <div class="ex-stats"><span class="ex-stat" id="ex-unmiss-count">— sorties</span><span class="ex-stat" id="ex-unmiss-ac">Top AC: —</span></div>
+    </div>
+    <div class="ex-card" style="--ex-color:#a855f7">
+      <div class="ex-header"><span class="ex-dot" style="background:#a855f7"></span><span class="ex-name">MONUSCO</span><span class="ex-badge">UN Mission · DRC</span></div>
+      <div class="ex-full">UN Organization Stabilization Mission in the DRC</div>
+      <div class="ex-desc">Stabilisation and protection of civilians in eastern DRC. Routes: Entebbe → Beni / Bunia / FIH (Kinshasa).</div>
+      <div class="ex-stats"><span class="ex-stat" id="ex-monusco-count">— sorties</span><span class="ex-stat" id="ex-monusco-ac">Top AC: —</span></div>
+    </div>
+    <div class="ex-card" style="--ex-color:#00c896">
+      <div class="ex-header"><span class="ex-dot" style="background:#00c896"></span><span class="ex-name">UNISFA</span><span class="ex-badge">UN Mission · Abyei</span></div>
+      <div class="ex-full">UN Interim Security Force for Abyei</div>
+      <div class="ex-desc">Maintains peace in the disputed Abyei region between Sudan and South Sudan. Route: Entebbe → Wau (WAU).</div>
+      <div class="ex-stats"><span class="ex-stat" id="ex-unisfa-count">— sorties</span><span class="ex-stat" id="ex-unisfa-ac">Top AC: —</span></div>
+    </div>
+    <div class="ex-card" style="--ex-color:#f59e0b">
+      <div class="ex-header"><span class="ex-dot" style="background:#f59e0b"></span><span class="ex-name">MINUSCA</span><span class="ex-badge">UN Mission · CAR</span></div>
+      <div class="ex-full">UN Multidimensional Integrated Stabilization Mission in the CAR</div>
+      <div class="ex-desc">Protects civilians and supports political transition in the Central African Republic. Hub: Bangui.</div>
+      <div class="ex-stats"><span class="ex-stat" id="ex-minusca-count">— sorties</span><span class="ex-stat" id="ex-minusca-ac">Top AC: —</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- AIRCRAFT FLEET VIEWER -->
+<div class="card" id="aircraft-explainer">
+  <div class="card-title">Aircraft Fleet Reference <span class="card-title-accent" id="fleet-count"></span></div>
+
+  <!-- RIBBON -->
+  <div class="fleet-ribbon" id="fleet-ribbon"></div>
+
+  <!-- DROPDOWN -->
+  <div class="fleet-dropdown-wrap">
+    <div class="fleet-dropdown-label">SELECT AIRCRAFT</div>
+    <select class="fleet-select" id="fleet-select" onchange="selectAircraft(this.value)">
+      <option value="">— Choose aircraft type —</option>
+    </select>
+  </div>
+
+  <!-- VIEWER PANEL -->
+  <div class="fleet-viewer" id="fleet-viewer" style="display:none">
+    <div class="fleet-photo-wrap">
+      <img id="fleet-photo" src="" alt="" referrerpolicy="no-referrer" crossorigin="anonymous" onerror="this.style.opacity='0.3';this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'400\' height=\'250\'%3E%3Crect fill=\'%23111\' width=\'400\' height=\'250\'/%3E%3Ctext fill=\'%23444\' x=\'200\' y=\'130\' font-size=\'16\' text-anchor=\'middle\'%3EImage unavailable%3C/text%3E%3C/svg%3E'">
+      <div class="fleet-photo-credit" id="fleet-credit"></div>
+    </div>
+    <div class="fleet-detail">
+      <div class="fleet-detail-name" id="fleet-name"></div>
+      <div class="fleet-detail-role" id="fleet-role"></div>
+      <div class="fleet-detail-desc" id="fleet-desc"></div>
+      <div class="fleet-detail-specs" id="fleet-detail-specs"></div>
+      <div class="fleet-missions" id="fleet-missions"></div>
+      <div class="fleet-sorties-row" id="fleet-sorties-row"></div>
+    </div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-title">Daily Activity — <span id="day-label" style="color:var(--text3)"></span></div>
+  <div style="position:relative;height:130px"><canvas id="dayChart"></canvas></div>
+</div>
+
+<div class="card">
+  <div class="card-title">Monthly Trend — All Missions</div>
+  <div class="legend-row" id="trend-legend"></div>
+  <div style="position:relative;height:150px"><canvas id="trendChart"></canvas></div>
+</div>
+
+<!-- FLIGHT LOG -->
+<div class="card">
+  <div class="card-title">Flight Log <span class="card-title-accent" id="row-count"></span></div>
+  <div class="search-wrap">
+    <input type="text" id="search" placeholder="Search flight no. (e.g. 505P), aircraft, mission, destination…" oninput="renderTable()">
+  </div>
+  <div id="search-summary" style="display:none;background:rgba(0,200,255,0.07);border:1px solid rgba(0,200,255,0.2);border-radius:8px;padding:10px 14px;margin-bottom:10px;font-family:var(--font-mono);font-size:11px;color:var(--text2);">
+    <span id="search-summary-text"></span>
+  </div>
+  <div class="filters" id="filters-row"></div>
+  <div class="tbl-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th style="width:60px">Date</th>
+          <th style="width:88px">Mission</th>
+          <th style="width:52px">POSN</th>
+          <th style="width:75px">Dest</th>
+          <th style="width:100px">Aircraft</th>
+          <th style="width:62px">Arr.</th>
+          <th style="width:62px">Dep.</th>
+          <th style="width:100px">Flight No.</th>
+        </tr>
+      </thead>
+      <tbody id="tbody"></tbody>
+    </table>
+  </div>
+</div>
+
+<footer>
+  <div>WONDER'S UN FLIGHTS OPS · ENTEBBE BAY A4 · 2026 · <a href="#">Wonder Ventures</a></div>
+  <div id="footer-ts">—</div>
+</footer>
+</div>
+
+<script>
+// ── API ───────────────────────────────────────────────────────────────────────
+const API = 'https://script.google.com/macros/s/AKfycbw0smZJOqniwkclU_XfAVtBpWaEMgEiR2Ck0o5SsPD8EnJzj2zdU_RoJD9rIM6vdYogIQ/exec';
+const MC = {UNMISS:'#2979ff',MONUSCO:'#a855f7',UNISFA:'#00c896',MINUSCA:'#f59e0b'};
+const AC_PAL = ['#00c8ff','#a855f7','#00c896','#f59e0b','#ff6b35','#2979ff','#ec4899','#10b981','#6366f1'];
+
+let allData={}, MONTHS=[], curMonth='', activeFilter='all', charts={}, selectedAC='';
+
+// ── CLOCK ─────────────────────────────────────────────────────────────────────
+function updateClock(){
+  const n=new Date();
+  document.getElementById('clock').textContent =
+    n.getUTCHours().toString().padStart(2,'0')+':'+
+    n.getUTCMinutes().toString().padStart(2,'0')+':'+
+    n.getUTCSeconds().toString().padStart(2,'0')+' UTC';
+}
+setInterval(updateClock,1000); updateClock();
+
+// ── RADAR ─────────────────────────────────────────────────────────────────────
+let radarAngle = 0;
+function drawRadar(){
+  const c=document.getElementById('radarCanvas');
+  const ctx=c.getContext('2d');
+  const cx=60,cy=60,r=54;
+  ctx.clearRect(0,0,120,120);
+
+  // background
+  ctx.beginPath();ctx.arc(cx,cy,r,0,Math.PI*2);
+  ctx.fillStyle='rgba(0,200,255,0.03)';ctx.fill();
+
+  // grid circles
+  [0.33,0.66,1].forEach(f=>{
+    ctx.beginPath();ctx.arc(cx,cy,r*f,0,Math.PI*2);
+    ctx.strokeStyle='rgba(0,200,255,0.12)';ctx.lineWidth=1;ctx.stroke();
+  });
+
+  // cross hairs
+  ctx.strokeStyle='rgba(0,200,255,0.1)';ctx.lineWidth=1;
+  ctx.beginPath();ctx.moveTo(cx-r,cy);ctx.lineTo(cx+r,cy);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(cx,cy-r);ctx.lineTo(cx,cy+r);ctx.stroke();
+
+  // sweep
+  const grad=ctx.createConicalGradient?ctx.createConicalGradient(cx,cy,radarAngle):null;
+  ctx.save();
+  ctx.translate(cx,cy);ctx.rotate(radarAngle);
+  const sweep=ctx.createLinearGradient(0,0,r,0);
+  sweep.addColorStop(0,'rgba(0,200,255,0.5)');
+  sweep.addColorStop(1,'rgba(0,200,255,0)');
+  ctx.beginPath();ctx.moveTo(0,0);ctx.arc(0,0,r,-0.4,0.4);ctx.closePath();
+  ctx.fillStyle=sweep;ctx.fill();
+  ctx.restore();
+
+  // blips — fixed positions based on mission counts
+  const d=allData[curMonth]||[];
+  const mc=countBy(d,'mission');
+  const missions=Object.keys(mc);
+  const mColors={UNMISS:'#2979ff',MONUSCO:'#a855f7',UNISFA:'#00c896',MINUSCA:'#f59e0b'};
+  const blipPositions=[
+    {angle:0.8,dist:0.45},{angle:2.1,dist:0.7},{angle:3.8,dist:0.55},{angle:5.2,dist:0.35}
+  ];
+  missions.forEach((m,i)=>{
+    if(i>=blipPositions.length)return;
+    const bp=blipPositions[i];
+    const bx=cx+Math.cos(bp.angle)*r*bp.dist;
+    const by=cy+Math.sin(bp.angle)*r*bp.dist;
+    // glow
+    ctx.beginPath();ctx.arc(bx,by,5,0,Math.PI*2);
+    ctx.fillStyle=(mColors[m]||'#00c8ff')+'44';ctx.fill();
+    // core
+    ctx.beginPath();ctx.arc(bx,by,2.5,0,Math.PI*2);
+    ctx.fillStyle=mColors[m]||'#00c8ff';ctx.fill();
+  });
+
+  // center dot
+  ctx.beginPath();ctx.arc(cx,cy,3,0,Math.PI*2);
+  ctx.fillStyle='var(--accent,#00c8ff)';ctx.fill();
+  // outer ring
+  ctx.beginPath();ctx.arc(cx,cy,r,0,Math.PI*2);
+  ctx.strokeStyle='rgba(0,200,255,0.25)';ctx.lineWidth=1.5;ctx.stroke();
+
+  radarAngle=(radarAngle+0.025)%(Math.PI*2);
+}
+setInterval(drawRadar,40);
+
+// ── NORMALIZE ─────────────────────────────────────────────────────────────────
+function normAc(a){
+  if(!a)return'Other';const t=String(a).toUpperCase().trim();
+  if(t.includes('Q400'))return'Q400';
+  if(t.includes('SAAB'))return'SAAB 340B';
+  if(t.includes('ERJ'))return'ERJ-145';
+  if(t.includes('AN-26'))return'AN-26-100';
+  if(t.includes('CRJ'))return'CRJ 200LR';
+  if(t.includes('C130')||t.includes('C-130')||t.includes('C 130'))return'C-130';
+  if(t.includes('L410')||t.includes('L 410'))return'L410';
+  if(t.includes('DORNIER'))return'Dornier';
+  if(t.includes('MI-8'))return'MI-8MTV';
+  if(t.includes('MI-171'))return'MI-171SH';
+  if(t.includes('BEECHCRAFT')||t.includes('B1900')||t.includes('BE-1900'))return'Beechcraft';
+  if(t.includes('Q300'))return'Q300';
+  return String(a).trim();
+}
+function cleanTime(v){if(!v)return'';return String(v).replace(/\s*HRS.*/i,'').replace(/\s*HSR.*/i,'').trim();}
+function extractOp(r){if(!r)return'';const m=String(r).match(/by\s+(.+?)(\.|$)/i);return m?m[1].trim():String(r).trim();}
+function countBy(arr,key){return arr.reduce((acc,f)=>{acc[f[key]]=(acc[f[key]]||0)+1;return acc;},{});}
+
+function processSheet(rows){
+  if(!rows||!rows.length)return[];
+
+  // FORMAT A: array of arrays [[headers],[row],[row]...]
+  if(Array.isArray(rows[0])){
+    const headers=rows[0].map(h=>String(h).trim().toUpperCase());
+    const get=(row,...keys)=>{for(const k of keys){const i=headers.indexOf(k);if(i>=0&&row[i]!==undefined)return String(row[i]).trim();}return'';};
+    return rows.slice(1).map(row=>({
+      date:get(row,'DATE'),mission:get(row,'MISSION').toUpperCase(),
+      posn:get(row,'POSN'),dest:get(row,'DESTINATION'),
+      ac:normAc(get(row,'AIRCRAFT TYPE')),reg:get(row,'REG N.O','REG NO'),
+      flt:get(row,'FLIGHT N.O','FLIGHT NO'),bay:get(row,'BAY'),
+      arr:cleanTime(get(row,'ARRIVAL TIME')),
+      dep:cleanTime(get(row,"DEP'T TIME","DEPT TIME","DEP T TIME","DEPARTURE TIME","DEP TIME","DEPTIME")),
+      op:extractOp(get(row,'REMARKS')),
+    })).filter(r=>r.mission&&r.mission!=='MISSION'&&r.mission.length>1);
+  }
+
+  // FORMAT B: array of objects [{DATE:'...',MISSION:'...'}, ...]
+  const getO=(obj,...keys)=>{
+    for(const k of keys){
+      // try exact match first
+      if(obj[k]!==undefined&&obj[k]!==null&&String(obj[k]).trim())return String(obj[k]).trim();
+      // try case-insensitive
+      const found=Object.keys(obj).find(ok=>ok.trim().toUpperCase().replace(/[^A-Z0-9]/g,'')===k.toUpperCase().replace(/[^A-Z0-9]/g,''));
+      if(found&&obj[found]!==undefined&&obj[found]!==null&&String(obj[found]).trim())return String(obj[found]).trim();
+    }
+    return'';
+  };
+  return rows.map(obj=>({
+    date:getO(obj,'DATE'),
+    mission:getO(obj,'MISSION').toUpperCase(),
+    posn:getO(obj,'POSN'),
+    dest:getO(obj,'DESTINATION'),
+    ac:normAc(getO(obj,'AIRCRAFT TYPE')),
+    reg:getO(obj,'REG N.O','REG NO'),
+    flt:getO(obj,'FLIGHT N.O','FLIGHT NO'),
+    bay:getO(obj,'BAY'),
+    arr:cleanTime(getO(obj,'ARRIVAL TIME')),
+    dep:cleanTime(getO(obj,"DEP'T TIME","DEPT TIME","DEP T TIME","DEPARTURE TIME","DEP TIME","DEPTIME")),
+  })).filter(r=>r.mission&&r.mission!=='MISSION'&&r.mission.length>1);
+}
+
+// ── TICKER ────────────────────────────────────────────────────────────────────
+function buildTicker(){
+  const d=allData[curMonth]||[];
+  if(!d.length)return;
+  const items=d.slice(0,30).map(f=>
+    `<span class="ticker-item">${f.date} · <span>${f.mission}</span> · ${f.ac} · ${f.dest||'EBB'} <span class="ticker-sep">|</span></span>`
+  );
+  const inner=document.getElementById('ticker-inner');
+  inner.innerHTML=[...items,...items].join(''); // doubled for seamless loop
+}
+
+// ── FETCH ─────────────────────────────────────────────────────────────────────
+async function fetchData(){
+  const res=await fetch(API);
+  if(!res.ok)throw new Error('HTTP '+res.status);
+  const json=await res.json();
+  const out={};
+  for(const[month,rows]of Object.entries(json))out[month]=processSheet(rows);
+  return out;
+}
+
+// ── INIT ──────────────────────────────────────────────────────────────────────
+async function init(){
+  try{
+    document.getElementById('load-msg').textContent='Fetching live flight data…';
+    allData=await fetchData();
+    MONTHS=Object.keys(allData);
+    if(!MONTHS.length)throw new Error('No data returned.');
+    const withData=MONTHS.filter(m=>allData[m].length>0);
+    curMonth=withData.length?withData[withData.length-1]:MONTHS[0];
+    stamp();buildOverview();buildTabs();buildTrend();buildRadarStats();renderMonth();
+    document.getElementById('loading-screen').style.display='none';
+    document.getElementById('app').style.display='block';
+    setInterval(refreshData,5*60*1000);
+  }catch(e){showError(e.message);}
+}
+
+async function refreshData(){
+  document.getElementById('last-updated').textContent='Refreshing…';
+  try{
+    allData=await fetchData();stamp();buildOverview();buildTrend();buildRadarStats();renderMonth();
+  }catch(e){document.getElementById('last-updated').textContent='Refresh failed';}
+}
+
+function showError(msg){
+  document.getElementById('load-msg').style.display='none';
+  document.querySelector('.loader-ring').style.display='none';
+  document.querySelector('.loader-title').style.display='none';
+  const eb=document.getElementById('error-box');eb.style.display='block';
+  document.getElementById('error-msg').textContent=msg;
+}
+
+function stamp(){
+  const ts=new Date().toLocaleString('en-GB',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'});
+  document.getElementById('last-updated').textContent='Updated '+ts;
+  document.getElementById('footer-ts').textContent=ts;
+}
+
+// ── RADAR STATS ───────────────────────────────────────────────────────────────
+function buildRadarStats(){
+  const all=MONTHS.flatMap(m=>allData[m]||[]);
+  const d=allData[curMonth]||[];
+  const dm={};d.forEach(f=>{const n=parseInt(f.date);if(n)dm[n]=(dm[n]||0)+1;});
+  const peakDay=Object.entries(dm).sort((a,b)=>b[1]-a[1])[0]||['—',0];
+
+  document.getElementById('r-total').textContent=all.length;
+  document.getElementById('r-missions').textContent=new Set(all.map(f=>f.mission)).size;
+  document.getElementById('r-aircraft').textContent=new Set(all.map(f=>f.ac)).size;
+  document.getElementById('r-month').textContent=d.length;
+  document.getElementById('r-busiest').textContent=peakDay[1]?peakDay[1]+' sorties':'—';
+
+}
+
+// ── OVERVIEW ──────────────────────────────────────────────────────────────────
+function buildOverview(){
+  const max=Math.max(...MONTHS.map(m=>allData[m]?.length||0),1);
+  document.getElementById('overview').innerHTML=MONTHS.map(m=>{
+    const d=allData[m]||[];
+    const top=Object.entries(countBy(d,'mission')).sort((a,b)=>b[1]-a[1])[0]||['—',0];
+    const pct=Math.round(d.length/max*100);
+    return`<div class="ov-card${m===curMonth?' sel':''}" onclick="switchMonth('${m}')">
+      <div class="ov-month">${m.slice(0,3).toUpperCase()}</div>
+      <div class="ov-count">${d.length}</div>
+      <div class="ov-bar"><div class="ov-bar-fill" style="width:${pct}%"></div></div>
+      <div class="ov-sub">${top[0]}·${top[1]}</div>
+    </div>`;
+  }).join('');
+}
+
+function buildTabs(){
+  document.getElementById('month-tabs').innerHTML=MONTHS.map(m=>
+    `<button class="mtab${m===curMonth?' active':''}" onclick="switchMonth('${m}')">${m}</button>`
+  ).join('');
+}
+
+function switchMonth(m){
+  curMonth=m;activeFilter='all';
+  document.querySelectorAll('.mtab').forEach(t=>t.classList.toggle('active',t.textContent===m));
+  document.querySelectorAll('.ov-card').forEach((c,i)=>c.classList.toggle('sel',MONTHS[i]===m));
+  buildRadarStats();renderMonth();
+}
+
+// ── RENDER MONTH ──────────────────────────────────────────────────────────────
+function renderMonth(){
+  const d=allData[curMonth]||[];
+  const mc=countBy(d,'mission'),ac=countBy(d,'ac');
+  const topM=Object.entries(mc).sort((a,b)=>b[1]-a[1])[0]||['—',0];
+  const topA=Object.entries(ac).sort((a,b)=>b[1]-a[1])[0]||['—',0];
+  document.getElementById('m-total').textContent=d.length;
+  document.getElementById('m-sub').textContent=curMonth+' 2026 · Bay A4';
+  document.getElementById('m-mission').textContent=topM[0];
+  document.getElementById('m-mission-sub').textContent=topM[1]+' sorties';
+  document.getElementById('m-ac').textContent=topA[0];
+  document.getElementById('m-ac-sub').textContent=topA[1]+' sorties';
+  document.getElementById('day-label').textContent=curMonth.toUpperCase()+' 2026';
+  buildMissionChart(mc);buildAcChart(ac);buildDayChart(d);buildFilters(mc);buildTicker();buildExplainers();renderTable();
+}
+
+// ── CHARTS ────────────────────────────────────────────────────────────────────
+const CD={responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},animation:{duration:400}};
+const gC='rgba(0,200,255,0.05)';
+const tS={color:'#2e4a62',font:{size:10,family:"'JetBrains Mono'"}};
+
+function buildMissionChart(mc){
+  const labels=Object.keys(mc),data=Object.values(mc);
+  const colors=labels.map(l=>MC[l]||'#607d8b');
+  document.getElementById('mission-legend').innerHTML=labels.map((l,i)=>
+    `<span class="leg"><span class="leg-dot" style="background:${colors[i]}"></span>${l} <strong style="color:var(--text)">${data[i]}</strong></span>`).join('');
+  document.getElementById('mission-total').textContent='· '+data.reduce((a,b)=>a+b,0)+' sorties';
+  if(charts.mission)charts.mission.destroy();
+  charts.mission=new Chart(document.getElementById('missionChart'),{
+    type:'bar',data:{labels,datasets:[{data,backgroundColor:colors.map(c=>c+'22'),borderColor:colors,borderWidth:1.5,borderRadius:3}]},
+    options:{...CD,scales:{x:{grid:{display:false},ticks:tS},y:{grid:{color:gC},ticks:tS,beginAtZero:true}}}
+  });
+}
+
+function buildAcChart(ac){
+  const sorted=Object.entries(ac).sort((a,b)=>b[1]-a[1]).slice(0,8);
+  const labels=sorted.map(x=>x[0]),data=sorted.map(x=>x[1]);
+  const colors=labels.map((_,i)=>AC_PAL[i%AC_PAL.length]);
+  document.getElementById('ac-legend').innerHTML=labels.map((l,i)=>
+    `<span class="leg"><span class="leg-dot" style="background:${colors[i]}"></span>${l} <strong style="color:var(--text)">${data[i]}</strong></span>`).join('');
+  if(charts.ac)charts.ac.destroy();
+  charts.ac=new Chart(document.getElementById('acChart'),{
+    type:'bar',data:{labels,datasets:[{data,backgroundColor:colors.map(c=>c+'22'),borderColor:colors,borderWidth:1.5,borderRadius:3}]},
+    options:{...CD,scales:{x:{grid:{display:false},ticks:{...tS,font:{size:9,family:"'JetBrains Mono'"},maxRotation:35,autoSkip:false}},y:{grid:{color:gC},ticks:tS,beginAtZero:true}}}
+  });
+}
+
+function buildDayChart(d){
+  const dm={};d.forEach(f=>{const n=parseInt(f.date);if(n&&!isNaN(n))dm[n]=(dm[n]||0)+1;});
+  const days=Object.keys(dm).map(Number).sort((a,b)=>a-b);
+  if(charts.day)charts.day.destroy();
+  charts.day=new Chart(document.getElementById('dayChart'),{
+    type:'line',
+    data:{labels:days.map(String),datasets:[{data:days.map(x=>dm[x]),borderColor:'#00c8ff',backgroundColor:'rgba(0,200,255,0.06)',borderWidth:1.5,pointRadius:3,pointBackgroundColor:'#00c8ff',tension:.4,fill:true}]},
+    options:{...CD,scales:{x:{grid:{display:false},ticks:{...tS,autoSkip:true,maxTicksLimit:15}},y:{grid:{color:gC},ticks:tS,beginAtZero:true}}}
+  });
+}
+
+function buildTrend(){
+  const missions=['UNMISS','MONUSCO','UNISFA','MINUSCA'];
+  const colors=[MC.UNMISS,MC.MONUSCO,MC.UNISFA,MC.MINUSCA];
+  document.getElementById('trend-legend').innerHTML=missions.map((m,i)=>
+    `<span class="leg"><span class="leg-dot" style="background:${colors[i]}"></span>${m}</span>`).join('');
+  const datasets=missions.map((m,i)=>({
+    label:m,data:MONTHS.map(mo=>(allData[mo]||[]).filter(f=>f.mission===m).length),
+    borderColor:colors[i],backgroundColor:'transparent',borderWidth:1.5,
+    pointRadius:3,pointBackgroundColor:colors[i],tension:.4
+  }));
+  if(charts.trend)charts.trend.destroy();
+  charts.trend=new Chart(document.getElementById('trendChart'),{
+    type:'line',data:{labels:MONTHS.map(m=>m.slice(0,3).toUpperCase()),datasets},
+    options:{...CD,scales:{x:{grid:{display:false},ticks:tS},y:{grid:{color:gC},ticks:tS,beginAtZero:true}}}
+  });
+}
+
+// ── FILTERS & TABLE ───────────────────────────────────────────────────────────
+function buildFilters(mc){
+  document.getElementById('filters-row').innerHTML=
+    `<button class="fbtn on" onclick="setF('all',this)">ALL</button>`+
+    Object.keys(mc).map(m=>`<button class="fbtn" onclick="setF('${m}',this)">${m}</button>`).join('');
+}
+function setF(f,btn){activeFilter=f;document.querySelectorAll('.fbtn').forEach(b=>b.classList.remove('on'));btn.classList.add('on');renderTable();}
+
+function renderTable(){
+  const q=document.getElementById('search').value.trim().toLowerCase();
+  const d=allData[curMonth]||[];
+  const rows=d.filter(f=>{
+    const mf=activeFilter==='all'||f.mission===activeFilter;
+    const sq=!q||[f.date,f.mission,f.posn,f.dest,f.ac,f.flt,f.reg].join(' ').toLowerCase().includes(q);
+    return mf&&sq;
+  });
+  document.getElementById('row-count').textContent='· '+rows.length+' records';
+
+  // Search summary
+  const summaryEl=document.getElementById('search-summary');
+  const summaryText=document.getElementById('search-summary-text');
+  if(q&&rows.length>0){
+    const fltGroups={};
+    const acGroups={};
+    rows.forEach(f=>{
+      if(f.flt)fltGroups[f.flt]=(fltGroups[f.flt]||0)+1;
+      acGroups[f.ac]=(acGroups[f.ac]||0)+1;
+    });
+    let parts=[];
+    const fltEntries=Object.entries(fltGroups).sort((a,b)=>b[1]-a[1]);
+    if(fltEntries.length){
+      parts.push(fltEntries.map(([flt,n])=>`<strong style="color:var(--accent)">${flt}</strong>: ${n} flight${n>1?'s':''}`).join(' · '));
+    } else {
+      parts.push(Object.entries(acGroups).sort((a,b)=>b[1]-a[1]).map(([ac,n])=>`<strong style="color:var(--accent2)">${ac}</strong>: ${n}`).join(' · '));
+    }
+    parts.push(`${rows.length} total sorties in ${curMonth}`);
+    summaryText.innerHTML='🔍 '+parts.join(' &nbsp;&nbsp;·&nbsp;&nbsp; ');
+    summaryEl.style.display='block';
+  } else {
+    summaryEl.style.display='none';
+  }
+
+  const bc=m=>'badge b-'+(m in MC?m:'OTHER');
+  document.getElementById('tbody').innerHTML=rows.map(f=>`<tr>
+    <td style="color:var(--text2)">${f.date}</td>
+    <td><span class="${bc(f.mission)}">${f.mission}</span></td>
+    <td style="color:var(--text2)">${f.posn}</td>
+    <td style="color:var(--accent)">${f.dest}</td>
+    <td style="color:var(--accent2)">${f.ac}</td>
+    <td style="font-family:var(--font-mono);color:var(--accent2);font-size:11px">${f.arr||'—'}</td>
+    <td style="font-family:var(--font-mono);color:var(--text2);font-size:11px">${f.dep||'—'}</td>
+    <td style="color:var(--text3)">${f.flt}</td>
+    <td style="color:var(--text2)">${f.reg||''}</td>
+  </tr>`).join('');
+}
+function buildExplainers(){
+  const all = MONTHS.flatMap(m => allData[m]||[]);
+  const cur = allData[curMonth]||[];
+  const acInData = [...new Set(all.map(f=>f.ac))].sort((a,b)=>
+    (all.filter(f=>f.ac===b).length) - (all.filter(f=>f.ac===a).length)
+  );
+  const acCount = countBy(all,'ac');
+
+  // Update fleet count label
+  document.getElementById('fleet-count').textContent = '· '+acInData.length+' types in service';
+
+  // Mission explainer stats
+  ['UNMISS','MONUSCO','UNISFA','MINUSCA'].forEach(m=>{
+    const mAll=all.filter(f=>f.mission===m);
+    const mCur=cur.filter(f=>f.mission===m);
+    const topAc=Object.entries(countBy(mAll,'ac')).sort((a,b)=>b[1]-a[1])[0]||['—',0];
+    const cEl=document.getElementById('ex-'+m.toLowerCase()+'-count');
+    const aEl=document.getElementById('ex-'+m.toLowerCase()+'-ac');
+    if(cEl)cEl.textContent=mAll.length+' total · '+mCur.length+' this month';
+    if(aEl){aEl.textContent='Top AC: '+topAc[0];if(topAc[1]>5)aEl.classList.add('hot');}
+  });
+
+  // Build ribbon pills
+  const ribbon = document.getElementById('fleet-ribbon');
+  ribbon.innerHTML = acInData.map(ac =>
+    `<button class="fleet-pill${ac===selectedAC?' active':''}" onclick="selectAircraft('${ac}')">${ac}</button>`
+  ).join('');
+
+  // Build dropdown
+  const sel = document.getElementById('fleet-select');
+  sel.innerHTML = '<option value="">— Choose aircraft type —</option>' +
+    acInData.map(ac =>
+      `<option value="${ac}"${ac===selectedAC?' selected':''}>${ac} · ${acCount[ac]} sorties</option>`
+    ).join('');
+
+  // Show viewer if one is selected
+  if(selectedAC) renderFleetViewer(selectedAC, acCount);
+}
+
+function selectAircraft(ac){
+  if(!ac)return;
+  selectedAC = ac;
+  const all = MONTHS.flatMap(m => allData[m]||[]);
+  const acCount = countBy(all,'ac');
+  // update ribbon
+  document.querySelectorAll('.fleet-pill').forEach(p=>p.classList.toggle('active',p.textContent===ac));
+  // update dropdown
+  document.getElementById('fleet-select').value = ac;
+  renderFleetViewer(ac, acCount);
+}
+
+
+
+// ── AIRCRAFT ILLUSTRATIONS ────────────────────────────────────────────────────
+// Inline SVGs — no external dependency, always loads, properly shaped
+
+
+
+const AC_PHOTOS = {
+  'Q400':       './images/Q400.jpg',
+  'SAAB 340B':  './images/SAAB_340B.jpg',
+  'ERJ-145':    './images/ERJ-145.jpg',
+  'AN-26-100':  './images/AN-26-100.jpg',
+  'CRJ 200LR':  './images/CRJ_200LR.jpg',
+  'C-130':      './images/C-130.jpg',
+  'L410':       './images/L410.jpg',
+  'Q300':       './images/Q300.jpg',
+  'Beechcraft': './images/Beechcraft.jpg',
+  'MI-171SH':   './images/MI-171SH.jpg',
+  'MI-8MTV':    './images/MI-8MTV.jpg',
+  'Dornier':    './images/Dornier.jpg',
+};
+
+function renderFleetViewer(ac, acCount){
+  const d = AC_DATA[ac]||{role:'Aircraft',desc:'Operating from Entebbe Bay A4.',speed:'—',missions:[],photo:'',credit:''};
+  const viewer = document.getElementById('fleet-viewer');
+  viewer.style.display = 'grid';
+
+  // Use real embedded photo
+  const photoWrap = document.getElementById('fleet-photo').parentElement;
+  // remove any previous SVG illustration
+  const oldSvg = photoWrap.querySelector('.ac-svg-illustration');
+  if (oldSvg) oldSvg.remove();
+
+  const img = document.getElementById('fleet-photo');
+  img.style.display = 'block';
+  img.style.opacity = '0';
+  img.style.transition = 'opacity 0.4s';
+  img.onload = () => { img.style.opacity = '1'; };
+  img.src = AC_PHOTOS[ac] || '';
+  img.alt = ac + ' aircraft';
+  document.getElementById('fleet-credit').textContent = '© Photo via Wonder\'s UN Flights Ops 2026';
+
+  // Details
+  document.getElementById('fleet-name').textContent = ac;
+  document.getElementById('fleet-role').textContent = d.role;
+  document.getElementById('fleet-desc').textContent = d.desc;
+
+  // Specs
+  document.getElementById('fleet-detail-specs').innerHTML = `
+    <div class="fleet-spec-item">
+      <div class="fleet-spec-val">${d.speed}</div>
+      <div class="fleet-spec-label">Max cruise speed</div>
+    </div>
+    <div class="fleet-spec-item">
+      <div class="fleet-spec-val">${acCount[ac]||0}</div>
+      <div class="fleet-spec-label">Total sorties logged</div>
+    </div>`;
+
+  // Mission tags
+  document.getElementById('fleet-missions').innerHTML = d.missions.map(m=>
+    `<span class="fleet-m-tag" style="background:${MISSION_COLORS[m]||'#607d8b'}22;color:${MISSION_COLORS[m]||'#aaa'};border:1px solid ${MISSION_COLORS[m]||'#607d8b'}44">${m}</span>`
+  ).join('');
+
+  // Sorties this month vs total
+  const all = MONTHS.flatMap(mo => allData[mo]||[]);
+  const cur = allData[curMonth]||[];
+  const totalSorties = all.filter(f=>f.ac===ac).length;
+  const monthSorties = cur.filter(f=>f.ac===ac).length;
+  document.getElementById('fleet-sorties-row').innerHTML =
+    `<span>${totalSorties}</span> total sorties across all months · <span>${monthSorties}</span> in ${curMonth}`;
+}
+
+
+init();
+</script>
+</body>
+</html>
