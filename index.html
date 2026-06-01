@@ -1,0 +1,843 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Wonder's UN Flights Ops — Entebbe 2026</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#060b14;--s1:#0d1520;--s2:#111e2e;--s3:#162035;
+  --b1:rgba(0,200,255,.07);--b2:rgba(0,200,255,.16);--b3:rgba(0,200,255,.35);
+  --tx:#d0e8ff;--t2:#6a8faf;--t3:#2e4a62;
+  --ac:#00c8ff;--ac2:#00ff9d;--ac3:#ff6b35;
+  --un:#2979ff;--mo:#a855f7;--ui:#00c896;--mi:#f59e0b;
+  --fD:'Orbitron',sans-serif;--fB:'Inter',sans-serif;--fM:'JetBrains Mono',monospace;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{font-family:var(--fB);background:var(--bg);color:var(--tx);min-height:100vh;overflow-x:hidden;}
+body::before{content:'';position:fixed;inset:0;
+  background-image:linear-gradient(rgba(0,200,255,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(0,200,255,.025) 1px,transparent 1px);
+  background-size:48px 48px;pointer-events:none;z-index:0;}
+
+/* ── LOADING ── */
+#LS{position:fixed;inset:0;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:999;gap:18px;}
+.lr{width:56px;height:56px;border-radius:50%;border:2px solid var(--s2);border-top-color:var(--ac);box-shadow:0 0 20px rgba(0,200,255,.3);animation:spin 1s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg)}}
+.lt{font-family:var(--fD);font-size:13px;color:var(--ac);letter-spacing:.2em;}
+.ls{font-family:var(--fM);font-size:11px;color:var(--t2);}
+
+/* ── LAYOUT ── */
+.wrap{max-width:1440px;margin:0 auto;padding:0 24px;position:relative;z-index:1;}
+
+/* ── HEADER ── */
+header{padding:24px 0 20px;border-bottom:1px solid var(--b2);margin-bottom:24px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:14px;position:relative;}
+header::after{content:'';position:absolute;bottom:-1px;left:0;width:180px;height:1px;background:linear-gradient(90deg,var(--ac),transparent);box-shadow:0 0 8px var(--ac);}
+.hlogo{width:48px;height:48px;border-radius:50%;border:1px solid var(--b3);background:radial-gradient(circle,rgba(0,200,255,.15),transparent);display:flex;align-items:center;justify-content:center;flex-shrink:0;animation:rotate-slow 10s linear infinite;}
+@keyframes rotate-slow{to{transform:rotate(360deg)}}
+.hlogo svg{animation:rotate-slow 10s linear infinite reverse;}
+.hblock{display:flex;align-items:center;gap:14px;}
+.htitle{font-family:var(--fD);font-size:17px;font-weight:700;letter-spacing:.04em;}
+.htitle span{color:var(--ac);text-shadow:0 0 16px rgba(0,200,255,.5);}
+.hsub{font-family:var(--fM);font-size:10px;color:var(--t2);margin-top:3px;letter-spacing:.1em;}
+.hright{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+.beacon{display:flex;align-items:center;gap:8px;background:rgba(0,255,157,.05);border:1px solid rgba(0,255,157,.2);border-radius:8px;padding:7px 13px;}
+.beacon-rings{position:relative;width:18px;height:18px;flex-shrink:0;}
+.bc{position:absolute;top:50%;left:50%;width:7px;height:7px;border-radius:50%;background:var(--ac2);transform:translate(-50%,-50%);box-shadow:0 0 6px var(--ac2);}
+.br{position:absolute;top:50%;left:50%;border-radius:50%;border:1px solid var(--ac2);transform:translate(-50%,-50%);animation:bx 2s ease-out infinite;}
+.br:nth-child(2){width:13px;height:13px;animation-delay:.3s;}
+.br:nth-child(3){width:18px;height:18px;animation-delay:.7s;}
+@keyframes bx{0%{opacity:.8;transform:translate(-50%,-50%) scale(.2)}100%{opacity:0;transform:translate(-50%,-50%) scale(1)}}
+.blabel{font-family:var(--fM);font-size:10px;color:var(--ac2);letter-spacing:.1em;}
+#clock{font-family:var(--fM);font-size:11px;color:var(--t2);}
+.rbtn{background:transparent;border:1px solid var(--b2);border-radius:6px;padding:6px 13px;font-family:var(--fM);font-size:10px;color:var(--t2);cursor:pointer;transition:all .2s;letter-spacing:.05em;}
+.rbtn:hover{border-color:var(--ac);color:var(--ac);}
+#stamp{font-family:var(--fM);font-size:10px;color:var(--t3);}
+
+/* ── TICKER ── */
+.ticker{display:flex;align-items:center;gap:12px;background:var(--s1);border:1px solid var(--b1);border-radius:8px;padding:9px 16px;margin-bottom:20px;overflow:hidden;}
+.tklabel{font-family:var(--fM);font-size:9px;color:var(--ac);letter-spacing:.12em;white-space:nowrap;border-right:1px solid var(--b2);padding-right:12px;flex-shrink:0;}
+.tkscroll{overflow:hidden;flex:1;}
+.tkinner{display:flex;gap:28px;animation:ticker 45s linear infinite;white-space:nowrap;}
+.tkinner:hover{animation-play-state:paused;}
+@keyframes ticker{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+.tki{font-family:var(--fM);font-size:10px;color:var(--t2);}
+.tki b{color:var(--ac2);}
+
+/* ── RADAR STRIP ── */
+.rstrip{display:flex;align-items:center;gap:20px;background:var(--s1);border:1px solid var(--b1);border-radius:12px;padding:16px 20px;margin-bottom:20px;position:relative;overflow:hidden;}
+.rstrip::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:linear-gradient(180deg,transparent,var(--ac),transparent);animation:pulsebar 2s ease-in-out infinite;}
+@keyframes pulsebar{0%,100%{opacity:.2}50%{opacity:1}}
+.rdiv{width:1px;background:var(--b2);align-self:stretch;flex-shrink:0;}
+.rstats{flex:1;display:grid;grid-template-columns:repeat(5,1fr);gap:10px;}
+.rstat{text-align:center;}
+.rval{font-family:var(--fD);font-size:19px;font-weight:700;color:var(--ac);text-shadow:0 0 12px rgba(0,200,255,.3);}
+.rlbl{font-family:var(--fM);font-size:9px;color:var(--t2);margin-top:3px;text-transform:uppercase;letter-spacing:.1em;}
+
+/* ── OVERVIEW CARDS ── */
+.ovcards{display:grid;grid-template-columns:repeat(6,1fr);gap:8px;margin-bottom:20px;}
+.ovc{background:var(--s1);border:1px solid var(--b1);border-radius:10px;padding:12px 14px;cursor:pointer;transition:all .2s;position:relative;overflow:hidden;}
+.ovc::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(0,200,255,.06),transparent);opacity:0;transition:opacity .2s;}
+.ovc:hover::before,.ovc.sel::before{opacity:1;}
+.ovc:hover{border-color:var(--b2);transform:translateY(-2px);}
+.ovc.sel{border-color:var(--ac);box-shadow:0 0 14px rgba(0,200,255,.1);}
+.ovm{font-family:var(--fM);font-size:9px;color:var(--t2);margin-bottom:5px;text-transform:uppercase;letter-spacing:.1em;}
+.ovn{font-family:var(--fD);font-size:20px;font-weight:700;}
+.ovbar{height:2px;background:var(--s3);border-radius:1px;margin-top:7px;overflow:hidden;}
+.ovfill{height:100%;background:linear-gradient(90deg,var(--ac),var(--ac2));border-radius:1px;transition:width .5s cubic-bezier(.4,0,.2,1);}
+.ovsub{font-family:var(--fM);font-size:9px;color:var(--t3);margin-top:4px;}
+
+/* ── MONTH TABS ── */
+.mtabs{display:flex;gap:6px;margin-bottom:20px;flex-wrap:wrap;}
+.mtab{background:transparent;border:1px solid var(--b1);border-radius:6px;padding:6px 16px;font-family:var(--fM);font-size:10px;color:var(--t2);cursor:pointer;transition:all .2s;letter-spacing:.06em;text-transform:uppercase;}
+.mtab:hover{border-color:var(--b2);color:var(--tx);}
+.mtab.active{background:rgba(0,200,255,.08);border-color:var(--ac);color:var(--ac);}
+
+/* ── METRICS ── */
+.metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px;}
+.metric{background:var(--s1);border:1px solid var(--b1);border-radius:12px;padding:18px 20px;position:relative;overflow:hidden;transition:box-shadow .2s;}
+.metric:hover{box-shadow:0 0 20px rgba(0,200,255,.08);}
+.metric::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--mc,var(--ac)),transparent);}
+.metric::after{content:'';position:absolute;bottom:0;right:0;width:60px;height:60px;border-radius:50%;background:radial-gradient(circle,var(--mc,var(--ac)) 0%,transparent 70%);opacity:.05;}
+.micon{font-size:17px;margin-bottom:8px;display:block;}
+.mlbl{font-family:var(--fM);font-size:9px;color:var(--t2);text-transform:uppercase;letter-spacing:.1em;margin-bottom:6px;}
+.mval{font-family:var(--fD);font-size:26px;font-weight:700;line-height:1;}
+.msub{font-family:var(--fM);font-size:10px;color:var(--t3);margin-top:7px;}
+
+/* ── CARDS ── */
+.card{background:var(--s1);border:1px solid var(--b1);border-radius:12px;padding:18px 20px;margin-bottom:12px;}
+.ctitle{font-family:var(--fM);font-size:9px;color:var(--t2);text-transform:uppercase;letter-spacing:.12em;margin-bottom:14px;display:flex;align-items:center;justify-content:space-between;}
+.cacc{color:var(--ac);font-size:9px;}
+.panels{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;}
+.panel{background:var(--s1);border:1px solid var(--b1);border-radius:12px;padding:18px 20px;}
+.legrow{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px;}
+.leg{display:flex;align-items:center;gap:5px;font-family:var(--fM);font-size:10px;color:var(--t2);}
+.legdot{width:7px;height:7px;border-radius:2px;flex-shrink:0;}
+
+/* ── MISSION PROFILES ── */
+.mprofiles{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:12px;}
+.mp{background:var(--s2);border:1px solid var(--b1);border-left:3px solid var(--mc,var(--ac));border-radius:10px;padding:14px 15px;}
+.mpname{font-family:var(--fD);font-size:12px;font-weight:700;color:var(--tx);margin-bottom:2px;display:flex;align-items:center;gap:6px;}
+.mpfull{font-family:var(--fM);font-size:9px;color:var(--mc,var(--ac));margin-bottom:7px;}
+.mpdesc{font-family:var(--fB);font-size:11px;color:var(--t2);line-height:1.6;margin-bottom:8px;}
+.mpstats{display:flex;gap:6px;flex-wrap:wrap;}
+.mptag{font-family:var(--fM);font-size:9px;background:var(--s3);border:1px solid var(--b1);border-radius:4px;padding:2px 7px;color:var(--t2);}
+.mptag.hot{color:var(--ac2);border-color:rgba(0,255,157,.2);}
+
+/* ── FLEET VIEWER ── */
+.fleet-ribbon{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:14px;padding-bottom:14px;border-bottom:1px solid var(--b1);}
+.fpill{background:var(--s2);border:1px solid var(--b1);border-radius:20px;padding:5px 13px;font-family:var(--fM);font-size:10px;color:var(--t2);cursor:pointer;transition:all .2s;white-space:nowrap;letter-spacing:.05em;}
+.fpill:hover{border-color:var(--b2);color:var(--tx);}
+.fpill.active{background:rgba(0,200,255,.1);border-color:var(--ac);color:var(--ac);}
+.fselwrap{display:flex;align-items:center;gap:10px;margin-bottom:18px;}
+.fsellbl{font-family:var(--fM);font-size:9px;color:var(--t3);text-transform:uppercase;letter-spacing:.12em;white-space:nowrap;}
+.fsel{flex:1;max-width:380px;background:var(--s2);border:1px solid var(--b2);border-radius:8px;padding:9px 13px;font-family:var(--fM);font-size:11px;color:var(--tx);cursor:pointer;}
+.fsel:focus{outline:none;border-color:var(--ac);}
+.fsel option{background:var(--s2);}
+.fviewer{display:none;grid-template-columns:1.3fr 1fr;gap:22px;animation:fadein .3s ease;}
+@keyframes fadein{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
+.fphoto{position:relative;border-radius:12px;overflow:hidden;background:var(--s3);border:1px solid var(--b1);aspect-ratio:16/9;min-height:200px;}
+.fphoto img{width:100%;height:100%;object-fit:cover;display:block;opacity:0;transition:opacity .5s;}
+.fphoto img.loaded{opacity:1;}
+.fcredit{position:absolute;bottom:0;left:0;right:0;padding:7px 12px;background:linear-gradient(transparent,rgba(0,0,0,.7));font-family:var(--fM);font-size:9px;color:rgba(255,255,255,.45);}
+.fno-photo{width:100%;height:100%;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:8px;position:absolute;inset:0;}
+.fdetail{display:flex;flex-direction:column;gap:11px;}
+.fdname{font-family:var(--fD);font-size:18px;font-weight:700;color:var(--tx);letter-spacing:.05em;}
+.fdrole{font-family:var(--fM);font-size:9px;color:var(--ac);text-transform:uppercase;letter-spacing:.12em;margin-top:-5px;}
+.fddesc{font-family:var(--fB);font-size:12px;color:var(--t2);line-height:1.75;}
+.fdspecs{display:grid;grid-template-columns:1fr 1fr;gap:7px;}
+.fdspec{background:var(--s3);border:1px solid var(--b1);border-radius:8px;padding:9px 12px;}
+.fdspec-val{font-family:var(--fD);font-size:15px;font-weight:700;color:var(--tx);}
+.fdspec-lbl{font-family:var(--fM);font-size:9px;color:var(--t3);text-transform:uppercase;letter-spacing:.08em;margin-top:3px;}
+.fdmissions{display:flex;gap:5px;flex-wrap:wrap;}
+.fdmtag{font-family:var(--fM);font-size:9px;font-weight:600;padding:2px 8px;border-radius:3px;}
+.fdsorties{background:rgba(0,200,255,.05);border:1px solid rgba(0,200,255,.15);border-radius:7px;padding:8px 12px;font-family:var(--fM);font-size:10px;color:var(--t2);}
+.fdsorties span{color:var(--ac2);font-weight:600;}
+
+/* ── TABLE ── */
+.srchwrap{position:relative;margin-bottom:10px;}
+.srchwrap input{width:100%;background:var(--s2);border:1px solid var(--b1);border-radius:8px;padding:9px 12px 9px 34px;font-family:var(--fM);font-size:11px;color:var(--tx);transition:border-color .2s;}
+.srchwrap input::placeholder{color:var(--t3);}
+.srchwrap input:focus{outline:none;border-color:var(--ac);}
+.srchwrap::before{content:'⌕';position:absolute;left:11px;top:50%;transform:translateY(-50%);color:var(--t3);font-size:16px;}
+.filters{display:flex;gap:5px;margin-bottom:10px;flex-wrap:wrap;}
+.fbtn{background:transparent;border:1px solid var(--b1);border-radius:5px;padding:3px 11px;font-family:var(--fM);font-size:10px;color:var(--t2);cursor:pointer;transition:all .15s;text-transform:uppercase;letter-spacing:.05em;}
+.fbtn:hover{border-color:var(--b2);color:var(--tx);}
+.fbtn.on{background:rgba(0,200,255,.1);border-color:var(--ac);color:var(--ac);}
+#srch-summary{display:none;background:rgba(0,200,255,.06);border:1px solid rgba(0,200,255,.18);border-radius:7px;padding:9px 13px;margin-bottom:10px;font-family:var(--fM);font-size:10px;color:var(--t2);}
+.tblwrap{overflow-x:auto;max-height:420px;overflow-y:auto;}
+.tblwrap::-webkit-scrollbar{width:3px;height:3px;}
+.tblwrap::-webkit-scrollbar-thumb{background:var(--b2);border-radius:2px;}
+table{width:100%;border-collapse:collapse;font-family:var(--fM);font-size:11px;}
+thead th{font-size:9px;font-weight:600;color:var(--t3);text-align:left;padding:0 10px 9px 0;border-bottom:1px solid var(--b2);white-space:nowrap;text-transform:uppercase;letter-spacing:.08em;position:sticky;top:0;background:var(--s1);z-index:1;}
+tbody tr{border-bottom:1px solid var(--b1);transition:background .1s;}
+tbody tr:last-child{border-bottom:none;}
+tbody tr:hover{background:var(--s2);}
+tbody td{padding:8px 10px 8px 0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.badge{display:inline-block;font-size:9px;font-weight:700;font-family:var(--fM);padding:2px 7px;border-radius:3px;letter-spacing:.05em;}
+.bUN{background:rgba(41,121,255,.15);color:#60a5fa;border:1px solid rgba(41,121,255,.3);}
+.bMO{background:rgba(168,85,247,.15);color:#c084fc;border:1px solid rgba(168,85,247,.3);}
+.bUI{background:rgba(0,200,150,.12);color:#34d399;border:1px solid rgba(0,200,150,.3);}
+.bMI{background:rgba(245,158,11,.12);color:#fbbf24;border:1px solid rgba(245,158,11,.3);}
+.bOT{background:rgba(255,255,255,.05);color:var(--t2);border:1px solid var(--b1);}
+
+footer{margin-top:30px;padding:18px 0;border-top:1px solid var(--b1);display:flex;align-items:center;justify-content:space-between;font-family:var(--fM);font-size:10px;color:var(--t3);}
+footer a{color:var(--ac);text-decoration:none;}
+
+@media(max-width:1000px){.metrics{grid-template-columns:1fr 1fr}.panels{grid-template-columns:1fr}.ovcards{grid-template-columns:repeat(3,1fr)}.mprofiles{grid-template-columns:1fr 1fr}.fviewer{grid-template-columns:1fr}.rstats{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:600px){.ovcards{grid-template-columns:repeat(2,1fr)}.metrics{grid-template-columns:1fr}.rstats{grid-template-columns:repeat(2,1fr)}}
+</style>
+</head>
+<body>
+
+<!-- LOADING -->
+<div id="LS">
+  <div class="lr"></div>
+  <div class="lt">WONDER'S UN FLIGHTS OPS</div>
+  <div class="ls" id="lmsg">Connecting to live data…</div>
+</div>
+
+<div class="wrap" id="app" style="display:none">
+
+<!-- HEADER -->
+<header>
+  <div class="hblock">
+    <div class="hlogo">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--ac)" stroke-width="1.5">
+        <circle cx="12" cy="12" r="4"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4"/>
+        <circle cx="12" cy="12" r="9" stroke-dasharray="2 3"/>
+      </svg>
+    </div>
+    <div>
+      <div class="htitle"><span>Wonder's</span> UN Flights Ops</div>
+      <div class="hsub">ENTEBBE · BAY A4 · 2026 · LIVE OPERATIONS</div>
+    </div>
+  </div>
+  <div class="hright">
+    <div class="beacon">
+      <div class="beacon-rings"><div class="br"></div><div class="br"></div><div class="bc"></div></div>
+      <div class="blabel">LIVE</div>
+    </div>
+    <div id="clock">--:--:-- UTC</div>
+    <button class="rbtn" onclick="refreshData()">↻ REFRESH</button>
+    <div id="stamp">—</div>
+  </div>
+</header>
+
+<!-- TICKER -->
+<div class="ticker">
+  <div class="tklabel">▶ FEED</div>
+  <div class="tkscroll"><div class="tkinner" id="tkinner">Loading…</div></div>
+</div>
+
+<!-- RADAR STRIP -->
+<div class="rstrip">
+  <canvas id="radarC" width="110" height="110" style="flex-shrink:0"></canvas>
+  <div class="rdiv"></div>
+  <div class="rstats">
+    <div class="rstat"><div class="rval" id="r-all">—</div><div class="rlbl">Total Sorties</div></div>
+    <div class="rstat"><div class="rval" id="r-mis">—</div><div class="rlbl">Missions</div></div>
+    <div class="rstat"><div class="rval" id="r-ac">—</div><div class="rlbl">Aircraft Types</div></div>
+    <div class="rstat"><div class="rval" id="r-mo">—</div><div class="rlbl">This Month</div></div>
+    <div class="rstat"><div class="rval" id="r-pk">—</div><div class="rlbl">Peak Day</div></div>
+  </div>
+</div>
+
+<!-- OVERVIEW -->
+<div class="ovcards" id="ovcards"></div>
+<div class="mtabs" id="mtabs"></div>
+
+<!-- METRICS -->
+<div class="metrics">
+  <div class="metric" style="--mc:var(--ac)">
+    <span class="micon">✈</span>
+    <div class="mlbl">Total Flights</div>
+    <div class="mval" id="m-total">—</div>
+    <div class="msub" id="m-sub">—</div>
+  </div>
+  <div class="metric" style="--mc:var(--un)">
+    <span class="micon">🎯</span>
+    <div class="mlbl">Top Mission</div>
+    <div class="mval" id="m-mis" style="font-size:17px;padding-top:4px">—</div>
+    <div class="msub" id="m-mis-sub">—</div>
+  </div>
+  <div class="metric" style="--mc:var(--ac2)">
+    <span class="micon">🛩</span>
+    <div class="mlbl">Top Aircraft</div>
+    <div class="mval" id="m-ac" style="font-size:17px;padding-top:4px">—</div>
+    <div class="msub" id="m-ac-sub">—</div>
+  </div>
+</div>
+
+<!-- CHARTS -->
+<div class="panels">
+  <div class="panel">
+    <div class="ctitle">Flights by Mission <span class="cacc" id="mis-total"></span></div>
+    <div class="legrow" id="mis-leg"></div>
+    <div style="position:relative;height:195px"><canvas id="misChart"></canvas></div>
+  </div>
+  <div class="panel">
+    <div class="ctitle">Aircraft Breakdown</div>
+    <div class="legrow" id="ac-leg"></div>
+    <div style="position:relative;height:195px"><canvas id="acChart"></canvas></div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="ctitle">Daily Activity <span class="cacc" id="day-lbl"></span></div>
+  <div style="position:relative;height:125px"><canvas id="dayChart"></canvas></div>
+</div>
+
+<div class="card">
+  <div class="ctitle">Monthly Trend — All Missions</div>
+  <div class="legrow" id="trend-leg"></div>
+  <div style="position:relative;height:145px"><canvas id="trendChart"></canvas></div>
+</div>
+
+<!-- MISSION PROFILES -->
+<div class="card">
+  <div class="ctitle">Mission Profiles <span class="cacc">· What each mission does</span></div>
+  <div class="mprofiles" id="mprofiles"></div>
+</div>
+
+<!-- AIRCRAFT FLEET -->
+<div class="card">
+  <div class="ctitle">Aircraft Fleet Reference <span class="cacc" id="fleet-count"></span></div>
+  <div class="fleet-ribbon" id="fleet-ribbon"></div>
+  <div class="fselwrap">
+    <div class="fsellbl">Select Aircraft</div>
+    <select class="fsel" id="fsel" onchange="selectAC(this.value)">
+      <option value="">— Choose aircraft —</option>
+    </select>
+  </div>
+  <div class="fviewer" id="fviewer">
+    <div class="fphoto" id="fphoto-wrap">
+      <img id="fphoto-img" src="" alt="">
+      <div class="fno-photo" id="fno-photo" style="display:none">
+        <div style="font-size:44px;opacity:.3">✈</div>
+        <div style="font-family:var(--fM);font-size:11px;color:var(--t3)" id="fno-lbl"></div>
+      </div>
+      <div class="fcredit" id="fcredit"></div>
+    </div>
+    <div class="fdetail">
+      <div><div class="fdname" id="fdname"></div><div class="fdrole" id="fdrole"></div></div>
+      <div class="fddesc" id="fddesc"></div>
+      <div class="fdspecs" id="fdspecs"></div>
+      <div class="fdmissions" id="fdmissions"></div>
+      <div class="fdsorties" id="fdsorties"></div>
+    </div>
+  </div>
+</div>
+
+<!-- FLIGHT LOG -->
+<div class="card">
+  <div class="ctitle">Flight Log <span class="cacc" id="row-count"></span></div>
+  <div class="srchwrap">
+    <input type="text" id="srch" placeholder="Search flight no. (e.g. 505P), mission, aircraft, destination, reg…" oninput="renderTable()">
+  </div>
+  <div id="srch-summary"></div>
+  <div class="filters" id="filter-row"></div>
+  <div class="tblwrap">
+    <table>
+      <thead><tr>
+        <th style="width:58px">Date</th>
+        <th style="width:82px">Mission</th>
+        <th style="width:50px">POSN</th>
+        <th style="width:72px">Dest</th>
+        <th style="width:90px">Aircraft</th>
+        <th style="width:58px">Arr.</th>
+        <th style="width:58px">Dep.</th>
+        <th style="width:95px">Flight No.</th>
+        <th>Reg.</th>
+      </tr></thead>
+      <tbody id="tbody"></tbody>
+    </table>
+  </div>
+</div>
+
+<footer>
+  <div>WONDER'S UN FLIGHTS OPS · ENTEBBE BAY A4 · 2026 · <a href="https://simonkinene.github.io/UN-Flights-Dashboard">wonderventures</a></div>
+  <div id="fts">—</div>
+</footer>
+</div>
+
+<script>
+// ── CONFIG ────────────────────────────────────────────────────────────────────
+const API = 'https://script.google.com/macros/s/AKfycbw0smZJOqniwkclU_XfAVtBpWaEMgEiR2Ck0o5SsPD8EnJzj2zdU_RoJD9rIM6vdYogIQ/exec';
+const IMG  = 'https://raw.githubusercontent.com/simonkinene/UN-Flights-Dashboard/main/images/';
+const MC   = {UNMISS:'#2979ff',MONUSCO:'#a855f7',UNISFA:'#00c896',MINUSCA:'#f59e0b'};
+const ACP  = ['#00c8ff','#a855f7','#00c896','#f59e0b','#ff6b35','#2979ff','#ec4899','#10b981','#6366f1','#f472b6'];
+
+// ── STATE ─────────────────────────────────────────────────────────────────────
+let allData={}, MONTHS=[], curMonth='', activeFilter='all', selAC='', charts={};
+
+// ── AIRCRAFT DATA ─────────────────────────────────────────────────────────────
+const AC_DATA = {
+  'Q400':      {role:'Regional Turboprop',speed:'667 km/h',missions:['UNMISS','MONUSCO','UNISFA'],photo:'Bombardier-Dash-8-400.jpg',
+    desc:'The Bombardier Dash 8-Q400 is the workhorse of UN East Africa operations. High-wing twin turboprop with advanced noise suppression. Handles short and unpaved airstrips with ease. The most frequently operated aircraft at Bay A4.'},
+  'SAAB 340B': {role:'Regional Turboprop',speed:'522 km/h',missions:['MONUSCO'],photo:'SAAB 340B.jpg',
+    desc:'The SAAB 340B is a Swedish 33-seat twin turboprop built for regional routes. Highly reliable in hot-and-high conditions, making it ideal for DRC eastern routes into Beni and Bunia. Registered under Ukrainian operators (UR-ELZ) for MONUSCO.'},
+  'ERJ-145':   {role:'Regional Jet',speed:'833 km/h',missions:['UNISFA','UNMISS'],photo:'ERJ-145.jpg',
+    desc:'The Embraer ERJ-145 is a 50-seat regional jet with rear-mounted engines. Faster than turboprops, it handles UNISFA Wau and UNMISS Juba routes efficiently. East African Air Charters operates the 5Y-SOH registration seen at Entebbe.'},
+  'AN-26-100': {role:'Tactical Cargo Transport',speed:'440 km/h',missions:['MONUSCO','UNMISS'],photo:'AN-26-100.jpg',
+    desc:'The Antonov An-26 is a Soviet-era twin turboprop military transport built for rough airstrips and heavy cargo. Indispensable for MONUSCO logistics in eastern DRC where road access is impossible. Operated under Ukrainian registry (UR-UZK).'},
+  'CRJ 200LR': {role:'Regional Jet (Long Range)',speed:'830 km/h',missions:['MONUSCO'],photo:'CRJ 200LR.jpg',
+    desc:'The Bombardier CRJ-200LR is a 50-seat long-range regional jet. The LR variant has extended fuel capacity enabling direct Entebbe–Kinshasa (FIH) runs without fuel stops. Operated under Canadian registry (C-FWWU, C-FXLH) for MONUSCO.'},
+  'C-130':     {role:'Heavy Military Transport',speed:'643 km/h',missions:['UNMISS','MONUSCO','MINUSCA'],photo:'C-130.jpg',
+    desc:'The Lockheed C-130 Hercules is the backbone of heavy UN airlift. Four turboprop engines, rear loading ramp, and ability to operate from dirt strips make it irreplaceable for large cargo and troop movements across all UN missions.'},
+  'L410':      {role:'Light Utility Transport',speed:'365 km/h',missions:['UNMISS'],photo:'L410.jpg',
+    desc:'The LET L-410 Turbolet is a Czech-built 19-seat twin turboprop used for intra-mission hops within South Sudan (UNMISS) where short grass airstrips are the norm. Operated under Mauritius registry (3B-NBS) at Entebbe.'},
+  'Dornier':   {role:'Light Utility Aircraft',speed:'368 km/h',missions:['UNMISS'],photo:'Dornier.jpg',
+    desc:'The Dornier 228 is a German-built 19-seat twin turboprop utility aircraft. Highly versatile with short-field performance. Used for UNMISS intra-South Sudan hops and liaison flights. Operated under Kenyan registry (5Y-CCS) at Entebbe.'},
+  'MI-8MTV':   {role:'Transport Helicopter',speed:'250 km/h',missions:['MONUSCO'],photo:'MI-8MTV.jpg',
+    desc:'The Mil Mi-8MTV is a Russian medium transport helicopter — one of the most produced in history. Essential for MONUSCO ops in jungle and mountainous DRC terrain inaccessible by fixed-wing aircraft. Carries 24 fully equipped troops.'},
+  'MI-171SH':  {role:'Military Assault Helicopter',speed:'230 km/h',missions:['MONUSCO'],photo:'MI-171SH.jpg',
+    desc:'The Mil Mi-171Sh is an armed export variant of the Mi-8 family featuring weapons pylons and ballistic protection. Deployed by MONUSCO for armed escort, force protection, and rapid reaction in high-threat eastern DRC environments.'},
+  'Beechcraft': {role:'Light / Medical Evacuation',speed:'533 km/h',missions:['MONUSCO'],photo:'Beechcraft.jpg',
+    desc:'The Beechcraft 1900D is a pressurised 19-seat commuter aircraft. Its MEDEVAC configuration carries stretchers and medical equipment. Used by MONUSCO for priority personnel movement and emergency casualty evacuations from Beni and Bunia.'},
+  'Q300':      {role:'Regional Turboprop',speed:'528 km/h',missions:['UNMISS'],photo:'Q300.jpg',
+    desc:'The Bombardier Dash 8-Q300 is a 50-seat variant of the Q-series, slightly smaller than the Q400. Used for intra-mission South Sudan routes under UNMISS, particularly for Juba area hops and personnel rotation flights.'},
+};
+
+const MIS_INFO = {
+  UNMISS:  {color:'#2979ff',full:'United Nations Mission in South Sudan',
+    desc:'Supports peace consolidation, rule of law, and civilian protection in South Sudan. Primary route: Entebbe → Juba (JUB).'},
+  MONUSCO: {color:'#a855f7',full:'UN Organization Stabilization Mission in the DRC',
+    desc:'Stabilisation and protection of civilians in eastern DRC. Routes: Entebbe → Beni / Bunia / FIH (Kinshasa).'},
+  UNISFA:  {color:'#00c896',full:'UN Interim Security Force for Abyei',
+    desc:'Maintains peace in the disputed Abyei region between Sudan and South Sudan. Route: Entebbe → Wau (WAU).'},
+  MINUSCA: {color:'#f59e0b',full:'UN Multidimensional Integrated Stabilization Mission in the CAR',
+    desc:'Protects civilians and supports political transition in the Central African Republic. Hub: Bangui.'},
+};
+
+// ── CLOCK ─────────────────────────────────────────────────────────────────────
+function tick(){
+  const n=new Date();
+  document.getElementById('clock').textContent=
+    n.getUTCHours().toString().padStart(2,'0')+':'+
+    n.getUTCMinutes().toString().padStart(2,'0')+':'+
+    n.getUTCSeconds().toString().padStart(2,'0')+' UTC';
+}
+setInterval(tick,1000);tick();
+
+// ── RADAR ─────────────────────────────────────────────────────────────────────
+let radarAngle=0;
+function drawRadar(){
+  const cv=document.getElementById('radarC'),ctx=cv.getContext('2d');
+  const cx=55,cy=55,r=50;
+  ctx.clearRect(0,0,110,110);
+  // rings
+  [.33,.66,1].forEach(f=>{
+    ctx.beginPath();ctx.arc(cx,cy,r*f,0,Math.PI*2);
+    ctx.strokeStyle='rgba(0,200,255,.1)';ctx.lineWidth=1;ctx.stroke();
+  });
+  // crosshairs
+  ctx.strokeStyle='rgba(0,200,255,.08)';ctx.lineWidth=1;
+  [[cx-r,cy,cx+r,cy],[cx,cy-r,cx,cy+r]].forEach(([x1,y1,x2,y2])=>{
+    ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);ctx.stroke();
+  });
+  // sweep
+  ctx.save();ctx.translate(cx,cy);ctx.rotate(radarAngle);
+  const sw=ctx.createLinearGradient(0,0,r,0);
+  sw.addColorStop(0,'rgba(0,200,255,.55)');sw.addColorStop(1,'rgba(0,200,255,0)');
+  ctx.beginPath();ctx.moveTo(0,0);ctx.arc(0,0,r,-.45,.45);ctx.closePath();
+  ctx.fillStyle=sw;ctx.fill();ctx.restore();
+  // blips
+  const d=allData[curMonth]||[];
+  const mc=countBy(d,'mission');
+  const blips=[{a:.8,d:.45},{a:2.1,d:.7},{a:3.8,d:.55},{a:5.2,d:.35}];
+  Object.keys(mc).forEach((m,i)=>{
+    if(i>=blips.length)return;
+    const {a,d:bd}=blips[i];
+    const bx=cx+Math.cos(a)*r*bd,by=cy+Math.sin(a)*r*bd;
+    ctx.beginPath();ctx.arc(bx,by,4,0,Math.PI*2);
+    ctx.fillStyle=(MC[m]||'#00c8ff')+'44';ctx.fill();
+    ctx.beginPath();ctx.arc(bx,by,2,0,Math.PI*2);
+    ctx.fillStyle=MC[m]||'#00c8ff';ctx.fill();
+  });
+  // center
+  ctx.beginPath();ctx.arc(cx,cy,2.5,0,Math.PI*2);
+  ctx.fillStyle='#00c8ff';ctx.fill();
+  // outer ring
+  ctx.beginPath();ctx.arc(cx,cy,r,0,Math.PI*2);
+  ctx.strokeStyle='rgba(0,200,255,.22)';ctx.lineWidth=1.5;ctx.stroke();
+  radarAngle=(radarAngle+.022)%(Math.PI*2);
+}
+setInterval(drawRadar,40);
+
+// ── NORMALISE ─────────────────────────────────────────────────────────────────
+function normAc(a){
+  if(!a)return'Other';const t=String(a).toUpperCase().trim();
+  if(t.includes('Q400'))return'Q400';
+  if(t.includes('SAAB'))return'SAAB 340B';
+  if(t.includes('ERJ'))return'ERJ-145';
+  if(t.includes('AN-26'))return'AN-26-100';
+  if(t.includes('CRJ'))return'CRJ 200LR';
+  if(t.includes('C130')||t.includes('C-130')||t.includes('C 130'))return'C-130';
+  if(t.includes('L410')||t.includes('L 410'))return'L410';
+  if(t.includes('DORNIER'))return'Dornier';
+  if(t.includes('MI-8'))return'MI-8MTV';
+  if(t.includes('MI-171'))return'MI-171SH';
+  if(t.includes('BEECHCRAFT')||t.includes('B1900')||t.includes('BE-1900'))return'Beechcraft';
+  if(t.includes('Q300'))return'Q300';
+  return String(a).trim();
+}
+function cleanT(v){return v?String(v).replace(/\s*HRS.*/i,'').replace(/\s*HSR.*/i,'').trim():'';}
+function countBy(arr,k){return arr.reduce((a,f)=>{a[f[k]]=(a[f[k]]||0)+1;return a;},{});}
+
+// ── PROCESS SHEET DATA ────────────────────────────────────────────────────────
+function processSheet(rows){
+  if(!rows||!rows.length)return[];
+  // Format A: array of arrays
+  if(Array.isArray(rows[0])){
+    if(rows.length<2)return[];
+    const h=rows[0].map(x=>String(x||'').trim().toUpperCase());
+    const g=(row,...keys)=>{for(const k of keys){const i=h.indexOf(k);if(i>=0&&row[i]!=null)return String(row[i]).trim();}return'';};
+    return rows.slice(1).map(row=>({
+      date:g(row,'DATE'),mission:g(row,'MISSION').toUpperCase(),posn:g(row,'POSN'),
+      dest:g(row,'DESTINATION'),ac:normAc(g(row,'AIRCRAFT TYPE')),
+      reg:g(row,'REG N.O','REG NO'),flt:g(row,'FLIGHT N.O','FLIGHT NO'),
+      arr:cleanT(g(row,'ARRIVAL TIME')),
+      dep:cleanT(g(row,"DEP'T TIME","DEPT TIME","DEP T TIME","DEPARTURE TIME")),
+    })).filter(r=>r.mission&&r.mission!=='MISSION'&&r.mission.length>1);
+  }
+  // Format B: array of objects
+  return rows.map(obj=>{
+    const get=(...keys)=>{
+      for(const k of keys){
+        const found=Object.keys(obj).find(ok=>ok.trim().toUpperCase().replace(/[^A-Z0-9]/g,'')===k.toUpperCase().replace(/[^A-Z0-9]/g,''));
+        if(found&&obj[found]!=null&&String(obj[found]).trim())return String(obj[found]).trim();
+      }
+      return'';
+    };
+    return{
+      date:get('DATE'),mission:get('MISSION').toUpperCase(),posn:get('POSN'),
+      dest:get('DESTINATION'),ac:normAc(get('AIRCRAFT TYPE')),
+      reg:get('REG NO','REG N.O'),flt:get('FLIGHT NO','FLIGHT N.O'),
+      arr:cleanT(get('ARRIVAL TIME')),
+      dep:cleanT(get("DEP'T TIME","DEPT TIME","DEPTIME","DEPARTURE TIME")),
+    };
+  }).filter(r=>r.mission&&r.mission!=='MISSION'&&r.mission.length>1);
+}
+
+// ── FETCH ─────────────────────────────────────────────────────────────────────
+async function fetchData(){
+  const res=await fetch(API,{redirect:'follow'});
+  if(!res.ok)throw new Error('HTTP '+res.status);
+  const json=await res.json();
+  const out={};
+  for(const[m,rows]of Object.entries(json))out[m]=processSheet(rows);
+  return out;
+}
+
+// ── INIT ──────────────────────────────────────────────────────────────────────
+async function init(){
+  try{
+    document.getElementById('lmsg').textContent='Loading flight data from Google Sheets…';
+    allData=await fetchData();
+    MONTHS=Object.keys(allData);
+    if(!MONTHS.length)throw new Error('No sheet data returned.');
+    const wd=MONTHS.filter(m=>allData[m].length>0);
+    curMonth=wd.length?wd[wd.length-1]:MONTHS[0];
+    stamp();buildOvCards();buildTabs();buildTrend();buildRadarStats();renderMonth();
+    document.getElementById('LS').style.display='none';
+    document.getElementById('app').style.display='block';
+    setInterval(refreshData,5*60*1000);
+  }catch(e){
+    document.getElementById('lmsg').textContent='Error: '+e.message+' — retrying in 5s…';
+    setTimeout(init,5000);
+  }
+}
+
+async function refreshData(){
+  document.getElementById('stamp').textContent='Refreshing…';
+  try{allData=await fetchData();stamp();buildOvCards();buildTrend();buildRadarStats();renderMonth();}
+  catch(e){document.getElementById('stamp').textContent='Refresh failed';}
+}
+
+function stamp(){
+  const ts=new Date().toLocaleString('en-GB',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'});
+  document.getElementById('stamp').textContent='Updated '+ts;
+  document.getElementById('fts').textContent=ts;
+}
+
+// ── RADAR STATS ───────────────────────────────────────────────────────────────
+function buildRadarStats(){
+  const all=MONTHS.flatMap(m=>allData[m]||[]);
+  const d=allData[curMonth]||[];
+  const dm={};d.forEach(f=>{const n=parseInt(f.date);if(n)dm[n]=(dm[n]||0)+1;});
+  const pk=Object.entries(dm).sort((a,b)=>b[1]-a[1])[0]||['—',0];
+  document.getElementById('r-all').textContent=all.length;
+  document.getElementById('r-mis').textContent=new Set(all.map(f=>f.mission)).size;
+  document.getElementById('r-ac').textContent=new Set(all.map(f=>f.ac)).size;
+  document.getElementById('r-mo').textContent=d.length;
+  document.getElementById('r-pk').textContent=pk[1]?pk[1]+' sorties':'—';
+}
+
+// ── OVERVIEW CARDS ────────────────────────────────────────────────────────────
+function buildOvCards(){
+  const max=Math.max(...MONTHS.map(m=>allData[m]?.length||0),1);
+  document.getElementById('ovcards').innerHTML=MONTHS.map(m=>{
+    const d=allData[m]||[];
+    const top=Object.entries(countBy(d,'mission')).sort((a,b)=>b[1]-a[1])[0]||['—',0];
+    const pct=Math.round(d.length/max*100);
+    return`<div class="ovc${m===curMonth?' sel':''}" onclick="switchMonth('${m}')">
+      <div class="ovm">${m.slice(0,3).toUpperCase()}</div>
+      <div class="ovn">${d.length}</div>
+      <div class="ovbar"><div class="ovfill" style="width:${pct}%"></div></div>
+      <div class="ovsub">${top[0]}·${top[1]}</div>
+    </div>`;
+  }).join('');
+}
+
+function buildTabs(){
+  document.getElementById('mtabs').innerHTML=MONTHS.map(m=>
+    `<button class="mtab${m===curMonth?' active':''}" onclick="switchMonth('${m}')">${m}</button>`
+  ).join('');
+}
+
+function switchMonth(m){
+  curMonth=m;activeFilter='all';
+  document.querySelectorAll('.mtab').forEach(t=>t.classList.toggle('active',t.textContent===m));
+  document.querySelectorAll('.ovc').forEach((c,i)=>c.classList.toggle('sel',MONTHS[i]===m));
+  buildRadarStats();renderMonth();
+}
+
+// ── RENDER MONTH ──────────────────────────────────────────────────────────────
+function renderMonth(){
+  const d=allData[curMonth]||[];
+  const mc=countBy(d,'mission'),ac=countBy(d,'ac');
+  const topM=Object.entries(mc).sort((a,b)=>b[1]-a[1])[0]||['—',0];
+  const topA=Object.entries(ac).sort((a,b)=>b[1]-a[1])[0]||['—',0];
+  document.getElementById('m-total').textContent=d.length;
+  document.getElementById('m-sub').textContent=curMonth+' 2026 · Bay A4';
+  document.getElementById('m-mis').textContent=topM[0];
+  document.getElementById('m-mis-sub').textContent=topM[1]+' sorties';
+  document.getElementById('m-ac').textContent=topA[0];
+  document.getElementById('m-ac-sub').textContent=topA[1]+' sorties';
+  document.getElementById('day-lbl').textContent=curMonth.toUpperCase()+' 2026';
+  buildMisChart(mc);buildAcChart(ac);buildDayChart(d);
+  buildMisProfiles();buildFleetSection();buildFilters(mc);buildTicker();renderTable();
+}
+
+// ── CHARTS ────────────────────────────────────────────────────────────────────
+const CD={responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},animation:{duration:350}};
+const GC='rgba(0,200,255,.04)';
+const TS={color:'#2e4a62',font:{size:10,family:"'JetBrains Mono'"}};
+
+function mkBar(id,labels,data,colors){
+  if(charts[id])charts[id].destroy();
+  charts[id]=new Chart(document.getElementById(id),{
+    type:'bar',
+    data:{labels,datasets:[{data,backgroundColor:colors.map(c=>c+'22'),borderColor:colors,borderWidth:1.5,borderRadius:3}]},
+    options:{...CD,scales:{x:{grid:{display:false},ticks:TS},y:{grid:{color:GC},ticks:TS,beginAtZero:true}}}
+  });
+}
+
+function buildMisChart(mc){
+  const labels=Object.keys(mc),data=Object.values(mc);
+  const colors=labels.map(l=>MC[l]||'#607d8b');
+  document.getElementById('mis-leg').innerHTML=labels.map((l,i)=>
+    `<span class="leg"><span class="legdot" style="background:${colors[i]}"></span>${l} <strong style="color:var(--tx)">${data[i]}</strong></span>`).join('');
+  document.getElementById('mis-total').textContent='· '+data.reduce((a,b)=>a+b,0)+' sorties';
+  mkBar('misChart',labels,data,colors);
+}
+
+function buildAcChart(ac){
+  const sorted=Object.entries(ac).sort((a,b)=>b[1]-a[1]).slice(0,8);
+  const labels=sorted.map(x=>x[0]),data=sorted.map(x=>x[1]);
+  const colors=labels.map((_,i)=>ACP[i%ACP.length]);
+  document.getElementById('ac-leg').innerHTML=labels.map((l,i)=>
+    `<span class="leg"><span class="legdot" style="background:${colors[i]}"></span>${l} <strong style="color:var(--tx)">${data[i]}</strong></span>`).join('');
+  mkBar('acChart',labels,data,colors);
+}
+
+function buildDayChart(d){
+  const dm={};d.forEach(f=>{const n=parseInt(f.date);if(n&&!isNaN(n))dm[n]=(dm[n]||0)+1;});
+  const days=Object.keys(dm).map(Number).sort((a,b)=>a-b);
+  if(charts.day)charts.day.destroy();
+  charts.day=new Chart(document.getElementById('dayChart'),{
+    type:'line',
+    data:{labels:days.map(String),datasets:[{data:days.map(x=>dm[x]),borderColor:'#00c8ff',
+      backgroundColor:'rgba(0,200,255,.06)',borderWidth:1.5,pointRadius:3,
+      pointBackgroundColor:'#00c8ff',tension:.38,fill:true}]},
+    options:{...CD,scales:{x:{grid:{display:false},ticks:{...TS,autoSkip:true,maxTicksLimit:15}},y:{grid:{color:GC},ticks:TS,beginAtZero:true}}}
+  });
+}
+
+function buildTrend(){
+  const missions=['UNMISS','MONUSCO','UNISFA','MINUSCA'];
+  const colors=[MC.UNMISS,MC.MONUSCO,MC.UNISFA,MC.MINUSCA];
+  document.getElementById('trend-leg').innerHTML=missions.map((m,i)=>
+    `<span class="leg"><span class="legdot" style="background:${colors[i]}"></span>${m}</span>`).join('');
+  const datasets=missions.map((m,i)=>({
+    label:m,data:MONTHS.map(mo=>(allData[mo]||[]).filter(f=>f.mission===m).length),
+    borderColor:colors[i],backgroundColor:'transparent',borderWidth:1.5,
+    pointRadius:3,pointBackgroundColor:colors[i],tension:.38
+  }));
+  if(charts.trend)charts.trend.destroy();
+  charts.trend=new Chart(document.getElementById('trendChart'),{
+    type:'line',data:{labels:MONTHS.map(m=>m.slice(0,3).toUpperCase()),datasets},
+    options:{...CD,scales:{x:{grid:{display:false},ticks:TS},y:{grid:{color:GC},ticks:TS,beginAtZero:true}}}
+  });
+}
+
+// ── MISSION PROFILES ──────────────────────────────────────────────────────────
+function buildMisProfiles(){
+  const all=MONTHS.flatMap(m=>allData[m]||[]);
+  const cur=allData[curMonth]||[];
+  document.getElementById('mprofiles').innerHTML=Object.entries(MIS_INFO).map(([code,info])=>{
+    const total=all.filter(f=>f.mission===code).length;
+    const month=cur.filter(f=>f.mission===code).length;
+    const topAc=Object.entries(countBy(all.filter(f=>f.mission===code),'ac')).sort((a,b)=>b[1]-a[1])[0]||['—'];
+    return`<div class="mp" style="--mc:${info.color}">
+      <div class="mpname"><span style="width:8px;height:8px;border-radius:50%;background:${info.color};display:inline-block;flex-shrink:0"></span>${code}</div>
+      <div class="mpfull">${info.full}</div>
+      <div class="mpdesc">${info.desc}</div>
+      <div class="mpstats">
+        <span class="mptag">${total} total</span>
+        <span class="mptag ${month>0?'hot':''}">${month} this month</span>
+        <span class="mptag">Top AC: ${topAc[0]}</span>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ── FLEET SECTION ─────────────────────────────────────────────────────────────
+function buildFleetSection(){
+  const all=MONTHS.flatMap(m=>allData[m]||[]);
+  const acList=[...new Set(all.map(f=>f.ac))].sort((a,b)=>
+    (all.filter(f=>f.ac===b).length)-(all.filter(f=>f.ac===a).length));
+  const acCount=countBy(all,'ac');
+  document.getElementById('fleet-count').textContent='· '+acList.length+' types in service';
+  // ribbon
+  document.getElementById('fleet-ribbon').innerHTML=acList.map(ac=>
+    `<button class="fpill${ac===selAC?' active':''}" onclick="selectAC('${ac}')">${ac}</button>`
+  ).join('');
+  // dropdown
+  const sel=document.getElementById('fsel');
+  sel.innerHTML='<option value="">— Choose aircraft —</option>'+
+    acList.map(ac=>`<option value="${ac}"${ac===selAC?' selected':''}>${ac} · ${acCount[ac]} sorties</option>`).join('');
+  // render viewer if one selected
+  if(selAC) renderACViewer(selAC,acCount,all);
+}
+
+function selectAC(ac){
+  if(!ac)return;
+  selAC=ac;
+  document.querySelectorAll('.fpill').forEach(p=>p.classList.toggle('active',p.textContent===ac));
+  document.getElementById('fsel').value=ac;
+  const all=MONTHS.flatMap(m=>allData[m]||[]);
+  renderACViewer(ac,countBy(all,'ac'),all);
+}
+
+function renderACViewer(ac,acCount,all){
+  const d=AC_DATA[ac]||{role:'Aircraft',speed:'—',missions:[],photo:'',desc:'Operating from Entebbe Bay A4 under UN mission support.'};
+  const viewer=document.getElementById('fviewer');
+  viewer.style.display='grid';
+
+  // Photo
+  const img=document.getElementById('fphoto-img');
+  const noPhoto=document.getElementById('fno-photo');
+  document.getElementById('fno-lbl').textContent=ac;
+
+  if(d.photo){
+    const url=IMG+encodeURIComponent(d.photo);
+    img.className='';
+    img.style.opacity='0';
+    img.onload=()=>{img.style.opacity='1';img.classList.add('loaded');noPhoto.style.display='none';};
+    img.onerror=()=>{img.style.display='none';noPhoto.style.display='flex';};
+    img.style.display='block';
+    noPhoto.style.display='none';
+    img.src=url;
+    document.getElementById('fcredit').textContent='© Photo · Wonder\'s UN Flights Ops 2026';
+  } else {
+    img.style.display='none';
+    noPhoto.style.display='flex';
+  }
+
+  // Details
+  document.getElementById('fdname').textContent=ac;
+  document.getElementById('fdrole').textContent=d.role;
+  document.getElementById('fddesc').textContent=d.desc;
+
+  // Specs
+  document.getElementById('fdspecs').innerHTML=`
+    <div class="fdspec"><div class="fdspec-val">${d.speed}</div><div class="fdspec-lbl">Max cruise speed</div></div>
+    <div class="fdspec"><div class="fdspec-val">${acCount[ac]||0}</div><div class="fdspec-lbl">Total sorties logged</div></div>`;
+
+  // Missions
+  document.getElementById('fdmissions').innerHTML=(d.missions||[]).map(m=>
+    `<span class="fdmtag" style="background:${MC[m]||'#607'}22;color:${MC[m]||'#aaa'};border:1px solid ${MC[m]||'#607'}44">${m}</span>`
+  ).join('');
+
+  // Sorties
+  const total=all.filter(f=>f.ac===ac).length;
+  const month=(allData[curMonth]||[]).filter(f=>f.ac===ac).length;
+  document.getElementById('fdsorties').innerHTML=
+    `<span>${total}</span> total sorties across all months &nbsp;·&nbsp; <span>${month}</span> in ${curMonth}`;
+}
+
+// ── TICKER ────────────────────────────────────────────────────────────────────
+function buildTicker(){
+  const d=allData[curMonth]||[];
+  if(!d.length)return;
+  const items=d.slice(0,25).map(f=>
+    `<span class="tki">${f.date} · <b>${f.mission}</b> · ${f.ac} · ${f.dest||'EBB'} · ${f.arr||'—'} arr / ${f.dep||'—'} dep &nbsp;|&nbsp;</span>`
+  );
+  const inner=document.getElementById('tkinner');
+  inner.innerHTML=[...items,...items].join('');
+}
+
+// ── FILTERS & TABLE ───────────────────────────────────────────────────────────
+function buildFilters(mc){
+  document.getElementById('filter-row').innerHTML=
+    `<button class="fbtn on" onclick="setF('all',this)">ALL</button>`+
+    Object.keys(mc).map(m=>`<button class="fbtn" onclick="setF('${m}',this)">${m}</button>`).join('');
+}
+function setF(f,btn){activeFilter=f;document.querySelectorAll('.fbtn').forEach(b=>b.classList.remove('on'));btn.classList.add('on');renderTable();}
+
+function renderTable(){
+  const q=document.getElementById('srch').value.trim().toLowerCase();
+  const d=allData[curMonth]||[];
+  const rows=d.filter(f=>{
+    const mf=activeFilter==='all'||f.mission===activeFilter;
+    const sq=!q||[f.date,f.mission,f.posn,f.dest,f.ac,f.flt,f.reg].join(' ').toLowerCase().includes(q);
+    return mf&&sq;
+  });
+  document.getElementById('row-count').textContent='· '+rows.length+' records';
+
+  // Search summary
+  const sumEl=document.getElementById('srch-summary');
+  if(q&&rows.length>0){
+    const fg={},ag={};
+    rows.forEach(f=>{if(f.flt)fg[f.flt]=(fg[f.flt]||0)+1;ag[f.ac]=(ag[f.ac]||0)+1;});
+    const fparts=Object.entries(fg).sort((a,b)=>b[1]-a[1]).map(([flt,n])=>`<strong style="color:var(--ac)">${flt}</strong>: ${n} flight${n>1?'s':''}`).join(' · ');
+    const apart=Object.entries(ag).sort((a,b)=>b[1]-a[1]).map(([ac,n])=>`<strong style="color:var(--ac2)">${ac}</strong>: ${n}`).join(' · ');
+    sumEl.style.display='block';
+    sumEl.innerHTML='🔍 '+(fparts||apart)+' &nbsp;·&nbsp; <strong style="color:var(--tx)">'+rows.length+'</strong> sorties in '+curMonth;
+  } else {
+    sumEl.style.display='none';
+  }
+
+  const bc=m=>m==='UNMISS'?'bUN':m==='MONUSCO'?'bMO':m==='UNISFA'?'bUI':m==='MINUSCA'?'bMI':'bOT';
+  document.getElementById('tbody').innerHTML=rows.map(f=>`<tr>
+    <td style="color:var(--t2)">${f.date}</td>
+    <td><span class="badge ${bc(f.mission)}">${f.mission}</span></td>
+    <td style="color:var(--t2)">${f.posn}</td>
+    <td style="color:var(--ac)">${f.dest}</td>
+    <td style="color:var(--ac2)">${f.ac}</td>
+    <td style="color:var(--ac2)">${f.arr||'—'}</td>
+    <td style="color:var(--t2)">${f.dep||'—'}</td>
+    <td style="color:var(--t3)">${f.flt}</td>
+    <td style="color:var(--t2)">${f.reg||''}</td>
+  </tr>`).join('');
+}
+
+// ── START ─────────────────────────────────────────────────────────────────────
+init();
+</script>
+</body>
+</html>
